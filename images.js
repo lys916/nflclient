@@ -1,0 +1,38 @@
+const images = {
+    teams: {
+        Cardinals: require('./assets/images/Cardinals.png'),
+        Falcons: require('./assets/images/Falcons.png'),
+        Ravens: require('./assets/images/Ravens.png'),
+        Bills: require('./assets/images/Bills.png'),
+        Panthers: require('./assets/images/Panthers.png'),
+        Bears: require('./assets/images/Bears.png'),
+        Bengals: require('./assets/images/Bengals.png'),
+        Browns: require('./assets/images/Browns.png'),
+        Cowboys: require('./assets/images/Cowboys.png'),
+        Broncos: require('./assets/images/Broncos.png'),
+        Lions: require('./assets/images/Lions.png'),
+        Packers: require('./assets/images/Packers.png'),
+        Texans: require('./assets/images/Texans.png'),
+        Colts: require('./assets/images/Colts.png'),
+        Jaguars: require('./assets/images/Jaguars.png'),
+        Chiefs: require('./assets/images/Chiefs.png'),
+        Dolphins: require('./assets/images/Dolphins.png'),
+        Vikings: require('./assets/images/Vikings.png'),
+        Patriots: require('./assets/images/Patriots.png'),
+        Saints: require('./assets/images/Saints.png'),
+        Giants: require('./assets/images/Giants.png'),
+        Jets: require('./assets/images/Jets.png'),
+        Raiders: require('./assets/images/Raiders.png'),
+        Eagles: require('./assets/images/Eagles.png'),
+        Steelers: require('./assets/images/Steelers.png'),
+        Chargers: require('./assets/images/Chargers.png'),
+        '49ers': require('./assets/images/49ers.png'),
+        Seahawks: require('./assets/images/Seahawks.png'),
+        Rams: require('./assets/images/Rams.png'),
+        Buccaneers: require('./assets/images/Buccaneers.png'),
+        Titans: require('./assets/images/Titans.png'),
+        Redskins: require('./assets/images/Redskins.png'),
+    }
+};
+
+export default images;

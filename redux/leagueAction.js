@@ -54,7 +54,7 @@ export const fetchLeague = (id) => {
             type: 'FETCHING_LEAGUE'
         });
         return axios.get(`http://192.168.1.67:5000/league/fetch/${id}`).then(res => {
-            console.log('league fetched from server');
+            console.log('league fetched from server', res.data);
             dispatch({
                 type: 'LEAGUE_FETCHED',
                 payload: res.data

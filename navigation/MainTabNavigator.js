@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Icon } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
@@ -14,13 +14,17 @@ const HomeStack = createStackNavigator({
 
 HomeStack.navigationOptions = {
   tabBarLabel: 'Games',
+  tabBarOptions: {
+    labelStyle: { fontSize: 15 },
+  },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
+      iconType={'ionicons'}
       name={
         Platform.OS === 'ios'
-          ? `ios-information-circle${focused ? '' : '-outline'}`
-          : 'md-information-circle'
+          ? `md-american-football${focused ? '' : '-outline'}`
+          : 'md-american-football'
       }
     />
   ),
@@ -32,10 +36,14 @@ const LinksStack = createStackNavigator({
 
 LinksStack.navigationOptions = {
   tabBarLabel: 'Picks',
+  tabBarOptions: {
+    labelStyle: { fontSize: 15 },
+  },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
+      iconType={'materialcommunityicons'}
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'}
+      name={Platform.OS === 'ios' ? 'fotoball-helmet' : 'football-helmet'}
     />
   ),
 };
@@ -46,10 +54,14 @@ const StandingsStack = createStackNavigator({
 
 StandingsStack.navigationOptions = {
   tabBarLabel: 'Standings',
+  tabBarOptions: {
+    labelStyle: { fontSize: 15 },
+  },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
+      iconType={'ionicons'}
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'}
+      name={Platform.OS === 'ios' ? 'ios-trophy' : 'md-trophy'}
     />
   ),
 };
@@ -60,10 +72,14 @@ const SettingsStack = createStackNavigator({
 
 SettingsStack.navigationOptions = {
   tabBarLabel: 'Settings',
+  tabBarOptions: {
+    labelStyle: { fontSize: 15 },
+  },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
+      iconType={'ionicons'}
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'}
+      name={Platform.OS === 'ios' ? 'ios-settings' : 'md-settings'}
     />
   ),
 };

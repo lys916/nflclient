@@ -3,6 +3,7 @@ import { Font } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
 import { connect } from 'react-redux';
 import Weeks from '../components/Weeks';
+import images from '../images';
 import {
   Container, StatusBar, Header,
   Content, Card, CardItem,
@@ -10,12 +11,12 @@ import {
 } from 'native-base';
 
 import {
-  Image,
+  Image, AsyncStorage,
   Platform,
   ScrollView,
-  StyleSheet, ProgressBarAndroid,
+  StyleSheet, ProgressBarAndroid, TouchableWithoutFeedback,
   // Text,
-  TouchableOpacity, TouchableNativeFeedback,
+  TouchableOpacity, TouchableNativeFeedback, TouchableHighlight,
   View,
 } from 'react-native';
 
@@ -33,7 +34,8 @@ class HomeScreen extends React.Component {
   };
 
   state = {
-    loading: true,
+    loadingIndex: null,
+    user: {}
   }
 
   setModalVisible(visible) {
@@ -49,122 +51,185 @@ class HomeScreen extends React.Component {
   //   });
   // }
 
-  componentWillMount() {
-    console.log('Home screen did mount - fetching picks');
-    this.props.getPicks();
+  async componentWillMount() {
+    //before the component renders, we want to load the user for later use
+    const jsonUser = await AsyncStorage.getItem('user');
+    const user = JSON.parse(jsonUser);
+    this.setState({ user });
+    this.props.getPicks(user.currentLeague);
   }
 
   addPickToGame = (games, picks) => {
-    games.forEach(game => {
-      game.selected = null;
-      game.localPickId = null;
-      picks.forEach(pick => {
-        if (game._id === pick.game._id) {
-          game.selected = pick.selected;
-          game.localPickId = pick._id;
+    if (games.length > 0 && picks.length > 0) {
+      games.forEach(game => {
+        // to start off, we assume none of the game has been selected
+        game.selected = null;
+        game.localPickId = null;
+        game.pickImage = null;
+
+        // assume all games open for selection
+        game.result = 'open';
+
+
+        // loop through picks to match the game
+        picks.forEach(pick => {
+          // game._id === pick.game._id && 
+          // console.log('ZZZZZZZZZZZZZZZ: ', pick);
+          // alert(user._id);
+          if (game._id === pick.game._id && pick.user._id === this.state.user._id) {
+
+            // if user made a selection for this game, apply selection
+            game.selected = pick.selected;
+            game.localPickId = pick._id;
+            game.pickImage = game[pick.selected + 'Team'].name;
+
+            // if game is locked, get lose or win result otherwise leave at pending
+            if (game.winner) {
+              // change result to either win, lose or tie
+              if (game.winner === 'tie') {
+                game.result = 'tie';
+              } else if (game.winner === 'pending') {
+                game.result = 'pending';
+              }
+              else if (game.winner === pick.selected) {
+                game.result = 'win';
+              }
+              else {
+                game.result = 'lose'
+              }
+            }
+          }
+
+        });
+        if (!game.selected && game.winner !== null) {
+          game.result = 'lose';
         }
       });
-    });
+
+    }
   }
 
-  handleCreatePick = async (game, selected) => {
+  handleCreatePick = async (game, selected, index) => {
+    if (game.winner) {
+      return;
+    }
+    this.setState({ loadingIndex: index });
+    // get user from storage
+    const jsonUser = await AsyncStorage.getItem('user');
+    const user = JSON.parse(jsonUser);
+
     if (!game.selected) {
       const pick = {
-        game,
+        game: game._id,
+        user: user._id,
+        league: user.currentLeague,
         selected
       };
-      this.setState({ loading: true });
-      const loading = await this.props.createPick(pick);
-      this.setState({ loading });
+
+      await this.props.createPick(pick);
     }
     else if (game.selected === selected) {
       // remove pick
       // console.log('remove pick', game.localPickId);
-      this.props.deletePick(game.localPickId);
+      await this.props.deletePick(game.localPickId);
     }
     else {
       // update pick
       // console.log('update pick');
-      this.props.updatePick(game.localPickId);
+      await this.props.updatePick(game.localPickId);
     }
+    this.setState({ loadingIndex: null });
 
   }
 
   render() {
     const { picks, games, screenProps } = this.props;
+
     this.addPickToGame(games, picks);
+
     // showUserFromStorage('Home Screen');
     return (
       <ScrollView style={styles.root}>
         <Weeks screenProps={this.props.screenProps} />
 
-        {games.map(game => {
+        {games.map((game, index) => {
+
           return (
             <Card key={game._id} style={styles.card}>
-              <View style={styles.gameSection}>
+              <View style={styles.dateBox}>
+                <Text style={styles.dateTime}>Sunday, September 7</Text>
+                <Text style={styles.dateTime}>10:00 AM</Text>
+              </View>
+              <View style={styles.gameBox}>
+                <View style={styles.gameSection}>
 
-                {/* Road team */}
-                <TouchableNativeFeedback onPress={() => { this.handleCreatePick(game, 'road') }}>
-                  <CardItem style={game.selected === 'road' ? styles.teamSectionSelected : styles.teamSection} >
-                    {/* Team */}
-                    <View style={styles.teamBox}>
-                      {/* Name */}
-                      <View>
-                        <Image
-                          style={{ height: 40, width: 40, marginRight: 8 }}
-                          resizeMode="contain"
-                          source={require('../assets/images/Steelers.png')}
-                        />
+                  {/* Road team */}
+                  <TouchableWithoutFeedback onPress={() => { this.handleCreatePick(game, 'road', index) }}>
+                    {/* <CardItem style={game.selected === 'road' ? styles[game.result + 'Team'] : styles.openTeam} > */}
+                    <CardItem style={game.selected === 'road' ? styles.teamSelected : styles.team} >
+                      {/* Team */}
+                      <View style={styles.teamBox}>
+                        {/* Name */}
+                        <View>
+                          <Image
+                            style={{ height: 30, width: 30, marginRight: 8 }}
+                            resizeMode="contain"
+                            source={images.teams[game.roadTeam.name]}
+                          />
+                        </View>
+                        <Text style={styles.teamName}>
+                          {game.roadTeam.city}
+                        </Text>
                       </View>
-                      <Text style={styles.teamName}>
-                        {game.roadTeam.name}
-                      </Text>
-                    </View>
-                    {/* Spread */}
-                    <View style={styles.spreadBox}>
-                      <Text style={styles.spread}>{game.roadSpread}</Text>
-                      <Text>{game.selected === 'road' ? <Icon name='arrow-dropleft' /> : null}</Text>
-                    </View>
-
-                  </CardItem>
-                </TouchableNativeFeedback >
-
-                {/* Home team */}
-                <TouchableNativeFeedback onPress={() => { this.handleCreatePick(game, 'home') }}>
-                  <CardItem style={game.selected === 'home' ? styles.teamSectionSelected : styles.teamSection}>
-                    {/* Team */}
-                    <View style={styles.teamBox}>
-                      {/* Name */}
-                      <View>
-                        <Image
-                          style={{ height: 40, width: 40, marginRight: 8 }}
-                          resizeMode="contain"
-                          source={require('../assets/images/Giants.png')}
-                        />
+                      {/* Spread */}
+                      <View style={styles.spreadBox}>
+                        <Text style={styles.spread}>{game.roadSpread}</Text>
+                        <Text>{game.selected === 'road' ? <Icon name='arrow-dropleft' /> : <Text style={{ color: 'white' }}>?</Text>}</Text>
                       </View>
-                      <Text style={styles.teamName}>
-                        {game.roadTeam.name}
-                      </Text>
-                    </View>
-                    {/* Spread */}
-                    <View style={styles.spreadBox}>
-                      <Text style={styles.spread}>{game.homeSpread}</Text>
-                      <Text>{game.selected === 'home' ? <Icon name='arrow-dropleft' /> : null}</Text>
-                    </View>
 
-                  </CardItem>
-                </TouchableNativeFeedback>
+                    </CardItem>
+                  </TouchableWithoutFeedback  >
+
+                  {/* Home team */}
+                  <TouchableWithoutFeedback onPress={() => { this.handleCreatePick(game, 'home', index) }}>
+                    <CardItem style={game.selected === 'home' ? styles.teamSelected : styles.team}>
+                      {/* <CardItem style={game.selected === 'home' ? styles[game.result + 'Team'] : styles.openTeam}> */}
+                      {/* Team */}
+                      <View style={styles.teamBox}>
+                        {/* Name */}
+                        <View>
+                          <Image
+                            style={{ height: 30, width: 30, marginRight: 8 }}
+                            resizeMode="contain"
+                            source={images.teams[game.homeTeam.name]}
+                          />
+                        </View>
+                        <Text style={styles.teamName}>
+                          {game.homeTeam.city}
+                        </Text>
+                      </View>
+                      {/* Spread */}
+                      <View style={styles.spreadBox}>
+                        <Text style={styles.spread}>{game.homeSpread}</Text>
+                        <Text>{game.selected === 'home' ? <Icon name='arrow-dropleft' /> : <Text style={{ color: 'white' }}>?</Text>}</Text>
+                      </View>
+
+                    </CardItem>
+                  </TouchableWithoutFeedback >
+                </View>
+                {/* Selection */}
+                <View style={styles[game.result]}>
+
+                  {this.state.loadingIndex === index ? <ProgressBarAndroid /> : <Image
+                    style={{ height: 50, width: 50, marginRight: 8 }}
+                    resizeMode="contain"
+                    source={images.teams[game.pickImage]}
+                  />}
+
+                </View>
               </View>
 
-              {/* Selection */}
-              <View style={styles.pickSection}>
-                {this.state.loading ? <ProgressBarAndroid /> : <Image
-                  style={{ height: 60, width: 60, marginRight: 8, }}
-                  resizeMode="contain"
-                  source={require('../assets/images/Panthers.png')}
-                />}
 
-              </View>
             </Card>
             // <View style={styles.gameBox} key={game._id}>
 
@@ -209,46 +274,130 @@ class HomeScreen extends React.Component {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#999999',
   },
   card: {
+    marginBottom: 15
+  },
+  dateBox: {
     flexDirection: 'row',
-    marginBottom: 10
+    justifyContent: 'space-between',
+    padding: 5
+  },
+  dateTime: {
+    color: '#777777'
+  },
+  gameBox: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderColor: '#dedede'
+  },
+  teamSelected: {
+    backgroundColor: '#dedede',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  team: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderColor: '#dedede'
   },
   gameSection: {
     width: '70%',
     borderRightWidth: 1,
     borderColor: '#dedede'
   },
-  teamSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  gameSectionWin: {
+    width: '70%',
+    borderRightWidth: 1,
+    borderColor: '#e5ffe2'
   },
-  teamSectionSelected: {
+  gameSectionLose: {
+    width: '70%',
+    borderRightWidth: 1,
+    borderColor: '#ffe2e2'
+  },
+  openTeam: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingTop: 15,
+    paddingBottom: 15
+  },
+  winTeam: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 15,
+    paddingBottom: 15,
+    backgroundColor: '#e5ffe2'
+  },
+  loseTeam: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 15,
+    paddingBottom: 15,
+    backgroundColor: '#ffe2e2'
+  },
+  tieTeam: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 15,
+    paddingBottom: 15,
+    backgroundColor: '#e2edff'
+  },
+  pendingTeam: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 15,
+    paddingBottom: 15,
     backgroundColor: '#efefef'
   },
-  pickSection: {
+  win: {
+    width: '30%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#d5ffc9'
+  },
+  lose: {
+    width: '30%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffc9c9'
+  },
+  tie: {
+    width: '30%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#c9ddff'
+  },
+  pending: {
+    width: '30%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#dedede'
+  },
+  open: {
     width: '30%',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   teamName: {
-    fontSize: 20,
     color: '#2d2d2d'
   },
   teamBox: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   spreadBox: {
     flexDirection: 'row',
     alignItems: 'center'
   },
   spread: {
-    fontSize: 20,
     paddingRight: 5
   }
   // old down
@@ -278,6 +427,7 @@ const mapStateToProps = (state) => {
   return {
     picks: state.picks,
     games: state.games,
+    league: state.league
     // others: state.others
   }
 }

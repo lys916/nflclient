@@ -35,13 +35,12 @@ export default class App extends React.Component {
   changeWeek = (week) => {
     this.setState({ currentWeek: week });
   }
-
   render() {
     const screenProps = {
       currentWeek: this.state.currentWeek,
       changeWeek: this.changeWeek
     }
-    // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', screenProps);
+    console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', screenProps);
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
       return (
         <AppLoading

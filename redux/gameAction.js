@@ -54,7 +54,7 @@ export const fetchGames = (week) => {
             type: 'FETCHING_GAMES'
         });
         return axios.get(`http://192.168.1.67:5000/game/fetch/${week}`).then(res => {
-            // console.log('after fetch gameXXXXXXXXXX', res.data);
+            // console.log('after fetched gameXXXXXXXXXX', res.data);
             dispatch({
                 type: 'GAMES_FETCHED',
                 payload: res.data

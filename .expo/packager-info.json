@@ -1,9 +1,9 @@
 {
-  "devToolsPort": 19002,
-  "expoServerPort": null,
-  "packagerPort": null,
-  "packagerPid": null,
-  "expoServerNgrokUrl": null,
-  "packagerNgrokUrl": null,
-  "ngrokPid": null
+  "packagerPort": 19001,
+  "packagerPid": 16744,
+  "expoServerPort": 19000,
+  "expoServerNgrokUrl": "https://tx-m6j.anonymous.nflpick.exp.direct",
+  "packagerNgrokUrl": "https://packager.tx-m6j.anonymous.nflpick.exp.direct",
+  "ngrokPid": 9488,
+  "devToolsPort": 19002
 }
