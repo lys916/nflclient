@@ -15,8 +15,10 @@ export default class AuthLoadingScreen extends React.Component {
 
     // Fetch the token from storage then navigate to our appropriate place
     _bootstrapAsync = async () => {
+        console.log('in authloading.. bootstrapAsync before await');
         const jsonUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(jsonUser);
+        console.log('in authloading.. bootstrapAsync after await');
 
         // This will switch to the App screen or Auth screen and this loading
         // screen will be unmounted and thrown away.
@@ -26,6 +28,7 @@ export default class AuthLoadingScreen extends React.Component {
             if (!user.currentLeague) {
                 this.props.navigation.navigate('JoinLeague');
             } else {
+                console.log('in authloading.. redirect to Main');
                 this.props.navigation.navigate('Main');
             }
         }
@@ -34,6 +37,7 @@ export default class AuthLoadingScreen extends React.Component {
 
     // Render any loading content that you like here
     render() {
+        console.log('in authloading.. render');
         return (
             <View>
                 <ActivityIndicator />

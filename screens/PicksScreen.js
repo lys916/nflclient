@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Weeks from '../components/Weeks';
 import images from '../images';
+import _ from 'underscore';
 
 import { ScrollView, View, StyleSheet, Image, Text, Switch, Slider } from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
@@ -27,7 +28,7 @@ class Picks extends React.Component {
   }
 
   toggleView = () => {
-    console.log('sldkfj');
+    // console.log('sldkfj');
     this.setState({
       gameView: !this.state.gameView,
       playerView: !this.state.playerView
@@ -69,7 +70,7 @@ class Picks extends React.Component {
         }
       });
     });
-    console.log('FIRST XXXXXXXXXXXX', );
+    // console.log('FIRST XXXXXXXXXXXX', );
 
   }
 
@@ -77,10 +78,14 @@ class Picks extends React.Component {
     const { games } = this.props;
 
     this.addUserListToGame(games, this.props.picks);
-    console.log('SECONDXXXXXXXXXXXX', games);
     return (
-      <ScrollView style={styles.root}>
-        <Weeks screenProps={this.props.screenProps} />
+      <ScrollView style={styles.root} stickyHeaderIndices={[0]}>
+        {/* make week sticky, has to have Text component in order to work */}
+        <View style={{ elevation: 10 }}>
+          <Weeks screenProps={this.props.screenProps} />
+          <Text></Text>
+        </View>
+
 
         <View style={styles.viewBox}>
           <View style={styles.gameView}>
@@ -98,6 +103,15 @@ class Picks extends React.Component {
           // Game View
           <View>
             {games.map(game => {
+
+              let dummyArray = [];
+
+              if (game.roadUserList.length < game.homeUserList.length) {
+                const len = game.homeUserList.length - game.roadUserList.length;
+                // console.log('LEN???', len)
+                dummyArray = _.range(len);
+              }
+              // console.log('DUMMY FROM MAP', dummyArray);
               return (
                 <Card key={game._id} style={styles.card}>
 
@@ -124,21 +138,27 @@ class Picks extends React.Component {
                         <Text>{game.roadSpread}</Text>
                       </View>
 
-                      {game.roadUserList.length > 0 ?
-                        <View style={styles.roadPlayersBox}>
 
-                          {game.roadUserList.map((user, index) => {
-                            return (
+                      <View style={styles.roadPlayersBox}>
 
-                              <View style={styles.playerBox} key={index}>
-                                <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='contact' />
-                                <Text>{user}</Text>
-                              </View>
-                            );
-                          })}
+                        {game.roadUserList.map((user, index) => {
+                          return (
 
-                        </View> : null
-                      }
+                            <View style={styles.playerBox} key={index}>
+                              <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='contact' />
+                              <Text>{user}</Text>
+                            </View>
+                          );
+                        })}
+                        {/* purpose of this dummyArray is to apply right border to road player section if its empty of less than the home section, therefore we have to give the icon white color */}
+                        {dummyArray.map(i => {
+                          return (
+                            <View style={styles.playerBox} key={i}>
+                              <Icon style={{ fontSize: 20, color: 'white', marginLeft: 2, marginRight: 5 }} name='contact' />
+                            </View>
+                          );
+                        })}
+                      </View>
                     </View>
 
 
@@ -205,7 +225,7 @@ class Picks extends React.Component {
 
 const styles = StyleSheet.create({
   root: {
-    backgroundColor: '#999999'
+    backgroundColor: '#999999',
   },
   card: {
     marginBottom: 15
@@ -220,15 +240,17 @@ const styles = StyleSheet.create({
   },
   viewBox: {
     flexDirection: 'row',
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
+    marginTop: 105,
   },
   gameView: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: 5
+    paddingBottom: 4
   },
   playerView: {
     flexDirection: 'row',
+    paddingBottom: 4,
     alignItems: 'center'
   },
   viewTitle: {
@@ -367,7 +389,8 @@ const styles = StyleSheet.create({
   },
   roadPlayersBox: {
     padding: 10,
-
+    borderRightWidth: 1,
+    borderColor: '#dedede'
   },
   homePlayersBox: {
     padding: 10,

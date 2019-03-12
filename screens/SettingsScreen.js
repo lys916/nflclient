@@ -17,7 +17,7 @@ export default class SettingsScreen extends React.Component {
   signOut = async () => {
     await AsyncStorage.clear();
     const userToken = await AsyncStorage.getItem('user');
-    console.log('user auth after clear', userToken);
+    // console.log('user auth after clear', userToken);
     this.props.navigation.navigate('Login');
   };
 

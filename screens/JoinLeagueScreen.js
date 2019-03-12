@@ -43,7 +43,7 @@ class JoinLeagueScreen extends React.Component {
     if (id !== '' || pin !== '') {
       const jsonUser = await AsyncStorage.getItem('user');
       const user = JSON.parse(jsonUser);
-      console.log('wants to join league');
+      // console.log('wants to join league');
       const league = { id, pin, user: user._id };
       // console.log('league to save', league);
       const res = await axios.post(`http://192.168.1.67:5000/league/join`, league);

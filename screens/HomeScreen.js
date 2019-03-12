@@ -10,6 +10,9 @@ import {
   Body, Text, Icon, Spinner
 } from 'native-base';
 
+// var date = new Date('6/29/2011 1:00:00 AM UTC');
+// console.log('MY TIME MMMMMMM', date.toString());
+
 import {
   Image, AsyncStorage,
   Platform,
@@ -51,7 +54,7 @@ class HomeScreen extends React.Component {
   //   });
   // }
 
-  async componentWillMount() {
+  async componentDidMount() {
     //before the component renders, we want to load the user for later use
     const jsonUser = await AsyncStorage.getItem('user');
     const user = JSON.parse(jsonUser);
@@ -60,7 +63,7 @@ class HomeScreen extends React.Component {
   }
 
   addPickToGame = (games, picks) => {
-    if (games.length > 0 && picks.length > 0) {
+    if (games.length > 0) {
       games.forEach(game => {
         // to start off, we assume none of the game has been selected
         game.selected = null;
@@ -101,12 +104,15 @@ class HomeScreen extends React.Component {
           }
 
         });
+        // console.log('????????????', game.selected);
         if (!game.selected && game.winner !== null) {
+          // console.log('applying lose to result');
           game.result = 'lose';
         }
       });
 
     }
+    // return games;
   }
 
   handleCreatePick = async (game, selected, index) => {
@@ -145,111 +151,126 @@ class HomeScreen extends React.Component {
   render() {
     const { picks, games, screenProps } = this.props;
 
+    // if (this.props.loader.loading) {
+    //   return <View style={styles.loading}><ProgressBarAndroid /></View>
+    // }
     this.addPickToGame(games, picks);
+    // console.log('games should have lose result', games);
 
     // showUserFromStorage('Home Screen');
     return (
-      <ScrollView style={styles.root}>
-        <Weeks screenProps={this.props.screenProps} />
+      // { this.props.loader.loading ? <View style={styles.loading}><ProgressBarAndroid /></View> : null }
+      <ScrollView style={styles.root} stickyHeaderIndices={[0]}>
+        {/* make week sticky, has to have Text component in order to work */}
+        <View style={{ elevation: 10 }}>
+          <Weeks screenProps={this.props.screenProps} />
+          <Text></Text>
+        </View>
 
-        {games.map((game, index) => {
+        {this.props.loader.loading ?
+          <View style={styles.loading}><ProgressBarAndroid /></View> :
+          <View style={styles.container}>
+            {games.map((game, index) => {
 
-          return (
-            <Card key={game._id} style={styles.card}>
-              <View style={styles.dateBox}>
-                <Text style={styles.dateTime}>Sunday, September 7</Text>
-                <Text style={styles.dateTime}>10:00 AM</Text>
-              </View>
-              <View style={styles.gameBox}>
-                <View style={styles.gameSection}>
+              return (
 
-                  {/* Road team */}
-                  <TouchableWithoutFeedback onPress={() => { this.handleCreatePick(game, 'road', index) }}>
-                    {/* <CardItem style={game.selected === 'road' ? styles[game.result + 'Team'] : styles.openTeam} > */}
-                    <CardItem style={game.selected === 'road' ? styles.teamSelected : styles.team} >
-                      {/* Team */}
-                      <View style={styles.teamBox}>
-                        {/* Name */}
-                        <View>
-                          <Image
-                            style={{ height: 30, width: 30, marginRight: 8 }}
-                            resizeMode="contain"
-                            source={images.teams[game.roadTeam.name]}
-                          />
-                        </View>
-                        <Text style={styles.teamName}>
-                          {game.roadTeam.city}
-                        </Text>
-                      </View>
-                      {/* Spread */}
-                      <View style={styles.spreadBox}>
-                        <Text style={styles.spread}>{game.roadSpread}</Text>
-                        <Text>{game.selected === 'road' ? <Icon name='arrow-dropleft' /> : <Text style={{ color: 'white' }}>?</Text>}</Text>
-                      </View>
+                <Card key={game._id} style={styles.card}>
+                  <View style={styles.dateBox}>
+                    <Text style={styles.dateTime}>Sunday, September 7</Text>
+                    <Text style={styles.dateTime}>10:00 AM</Text>
+                  </View>
+                  <View style={styles.gameBox}>
+                    <View style={styles.gameSection}>
 
-                    </CardItem>
-                  </TouchableWithoutFeedback  >
+                      {/* Road team */}
+                      <TouchableWithoutFeedback onPress={() => { this.handleCreatePick(game, 'road', index) }}>
+                        {/* <CardItem style={game.selected === 'road' ? styles[game.result + 'Team'] : styles.openTeam} > */}
+                        <CardItem style={game.selected === 'road' ? styles.teamSelected : styles.team} >
+                          {/* Team */}
+                          <View style={styles.teamBox}>
+                            {/* Name */}
+                            <View>
+                              <Image
+                                style={{ height: 30, width: 30, marginRight: 8 }}
+                                resizeMode="contain"
+                                source={images.teams[game.roadTeam.name]}
+                              />
+                            </View>
+                            <Text style={styles.teamName}>
+                              {game.roadTeam.city}
+                            </Text>
+                          </View>
+                          {/* Spread */}
+                          <View style={styles.spreadBox}>
+                            <Text style={styles.spread}>{game.roadSpread}</Text>
+                            <Text>{game.selected === 'road' ? <Icon name='arrow-dropleft' /> : <Text style={{ color: 'white' }}>?</Text>}</Text>
+                          </View>
 
-                  {/* Home team */}
-                  <TouchableWithoutFeedback onPress={() => { this.handleCreatePick(game, 'home', index) }}>
-                    <CardItem style={game.selected === 'home' ? styles.teamSelected : styles.team}>
-                      {/* <CardItem style={game.selected === 'home' ? styles[game.result + 'Team'] : styles.openTeam}> */}
-                      {/* Team */}
-                      <View style={styles.teamBox}>
-                        {/* Name */}
-                        <View>
-                          <Image
-                            style={{ height: 30, width: 30, marginRight: 8 }}
-                            resizeMode="contain"
-                            source={images.teams[game.homeTeam.name]}
-                          />
-                        </View>
-                        <Text style={styles.teamName}>
-                          {game.homeTeam.city}
-                        </Text>
-                      </View>
-                      {/* Spread */}
-                      <View style={styles.spreadBox}>
-                        <Text style={styles.spread}>{game.homeSpread}</Text>
-                        <Text>{game.selected === 'home' ? <Icon name='arrow-dropleft' /> : <Text style={{ color: 'white' }}>?</Text>}</Text>
-                      </View>
+                        </CardItem>
+                      </TouchableWithoutFeedback  >
 
-                    </CardItem>
-                  </TouchableWithoutFeedback >
-                </View>
-                {/* Selection */}
-                <View style={styles[game.result]}>
+                      {/* Home team */}
+                      <TouchableWithoutFeedback onPress={() => { this.handleCreatePick(game, 'home', index) }}>
+                        <CardItem style={game.selected === 'home' ? styles.teamSelected : styles.team}>
+                          {/* <CardItem style={game.selected === 'home' ? styles[game.result + 'Team'] : styles.openTeam}> */}
+                          {/* Team */}
+                          <View style={styles.teamBox}>
+                            {/* Name */}
+                            <View>
+                              <Image
+                                style={{ height: 30, width: 30, marginRight: 8 }}
+                                resizeMode="contain"
+                                source={images.teams[game.homeTeam.name]}
+                              />
+                            </View>
+                            <Text style={styles.teamName}>
+                              {game.homeTeam.city}
+                            </Text>
+                          </View>
+                          {/* Spread */}
+                          <View style={styles.spreadBox}>
+                            <Text style={styles.spread}>{game.homeSpread}</Text>
+                            <Text>{game.selected === 'home' ? <Icon name='arrow-dropleft' /> : <Text style={{ color: 'white' }}>?</Text>}</Text>
+                          </View>
 
-                  {this.state.loadingIndex === index ? <ProgressBarAndroid /> : <Image
-                    style={{ height: 50, width: 50, marginRight: 8 }}
-                    resizeMode="contain"
-                    source={images.teams[game.pickImage]}
-                  />}
+                        </CardItem>
+                      </TouchableWithoutFeedback >
+                    </View>
+                    {/* Selection */}
+                    <View style={styles[game.result]}>
 
-                </View>
-              </View>
+                      {this.state.loadingIndex === index ? <ProgressBarAndroid /> : <Image
+                        style={{ height: 50, width: 50, marginRight: 8 }}
+                        resizeMode="contain"
+                        source={images.teams[game.pickImage]}
+                      />}
+
+                    </View>
+                  </View>
 
 
-            </Card>
-            // <View style={styles.gameBox} key={game._id}>
+                </Card>
 
-            //   <TouchableOpacity
-            //     style={game.selected === 'road' ? styles.teamBoxSelected : styles.teamBox} onPress={() => { this.handleCreatePick(game, 'road') }}>
-            //     <Text style={styles.teamName}>{game.roadTeam.name} {game.roadSpread}</Text>
-            //   </TouchableOpacity>
+                // <View style={styles.gameBox} key={game._id}>
 
-            //   <Text style={styles.at}>at</Text>
+                //   <TouchableOpacity
+                //     style={game.selected === 'road' ? styles.teamBoxSelected : styles.teamBox} onPress={() => { this.handleCreatePick(game, 'road') }}>
+                //     <Text style={styles.teamName}>{game.roadTeam.name} {game.roadSpread}</Text>
+                //   </TouchableOpacity>
 
-            //   <TouchableOpacity
-            //     style={game.selected === 'home' ? styles.teamBoxSelected : styles.teamBox} onPress={() => { this.handleCreatePick(game, 'home') }}>
-            //     <Text style={styles.teamName}>{game.homeTeam.name} {game.homeSpread}</Text>
-            //   </TouchableOpacity>
+                //   <Text style={styles.at}>at</Text>
 
-            // </View>
+                //   <TouchableOpacity
+                //     style={game.selected === 'home' ? styles.teamBoxSelected : styles.teamBox} onPress={() => { this.handleCreatePick(game, 'home') }}>
+                //     <Text style={styles.teamName}>{game.homeTeam.name} {game.homeSpread}</Text>
+                //   </TouchableOpacity>
 
-          );
-        })}
+                // </View>
 
+              );
+            })}
+          </View>
+        }
         {/* Test card */}
 
         {/* <Container>
@@ -272,9 +293,15 @@ class HomeScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  loading: {
+    marginTop: 200
+  },
   root: {
     flex: 1,
     backgroundColor: '#999999',
+  },
+  container: {
+    paddingTop: 110
   },
   card: {
     marginBottom: 15
@@ -424,10 +451,12 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
+  console.log('LOADER STATE', state.loader);
   return {
     picks: state.picks,
     games: state.games,
-    league: state.league
+    league: state.league,
+    loader: state.loader
     // others: state.others
   }
 }

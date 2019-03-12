@@ -3,7 +3,7 @@ import { Icon } from 'expo';
 
 import Colors from '../constants/Colors';
 
-console.log('xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz', Colors);
+// console.log('xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz', Colors);
 
 export default class TabBarIonicon extends React.Component {
   render() {
@@ -12,8 +12,8 @@ export default class TabBarIonicon extends React.Component {
         <Icon.Ionicons
           name={this.props.name}
           size={30}
-          style={{ marginBottom: 3, marginTop: 10 }}
-          color={this.props.focused ? Colors.tabIconSelected : Colors.tabIconDefault}
+          style={{ paddingTop: 10 }}
+          color={this.props.focused ? Colors.tabIconSelected : Colors.inactive}
         />
       );
     }
@@ -22,8 +22,8 @@ export default class TabBarIonicon extends React.Component {
         <Icon.MaterialCommunityIcons
           name={this.props.name}
           size={30}
-          style={{ marginBottom: 3, marginTop: 10 }}
-          color={this.props.focused ? Colors.tabIconSelected : Colors.tabIconDefault}
+          style={{ paddingTop: 10 }}
+          color={this.props.focused ? Colors.tabIconSelected : Colors.inactive}
         />
       );
     }

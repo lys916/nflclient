@@ -19,7 +19,7 @@ export default class LoginScreen extends React.Component {
     }
 
     login = async () => {
-        console.log('user logging in');
+        // console.log('user logging in');
         const { email, password } = this.state;
         const user = { email, password };
 

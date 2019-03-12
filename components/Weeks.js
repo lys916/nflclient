@@ -14,12 +14,13 @@ class Weeks extends React.Component {
   state = {
     user: {}
   }
+
   async componentDidMount() {
     const jsonUser = await AsyncStorage.getItem('user');
     const user = JSON.parse(jsonUser);
     this.setState({ user });
     //fetch game
-    this.props.fetchGames(this.props.screenProps.currentWeek);
+    const result = await this.props.fetchGames(this.props.screenProps.currentWeek, user.currentLeague);
 
     //fetch league and users
     if (user.currentLeague) {
@@ -37,27 +38,56 @@ class Weeks extends React.Component {
   render() {
     return (
       <View style={styles.root}>
-        <View style={styles.userLeague}>
-          <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='contact' />
-          <Text style={styles.user}>
-            {this.state.user.name}
-          </Text>
-          <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='bookmark' />
-          <Text>
-            {this.props.league.name}
-          </Text>
-        </View>
+        <View style={styles.userLeagueWeekBox} >
 
-        <View style={styles.weekBox}>
-          <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='calendar' />
-          <Picker
-            selectedValue={this.props.screenProps.currentWeek}
-            style={{ height: 50, width: 120 }}
-            onValueChange={(week) => { this.handleValueChange(week) }}
-          >
-            <Picker.Item label="Week 1" value="1" />
-            <Picker.Item label="Week 2" value="2" />
-          </Picker>
+          <View style={styles.userLeague}>
+            <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='contact' />
+            <Text style={styles.user}>
+              {this.state.user.name}
+            </Text>
+            <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='bookmark' />
+            <Text>
+              {this.props.league.name}
+            </Text>
+          </View>
+
+          <View style={styles.weekBox}>
+            <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='calendar' />
+            <Picker
+              selectedValue={this.props.screenProps.currentWeek}
+              style={{ height: 50, width: 120 }}
+              onValueChange={(week) => { this.handleValueChange(week) }}
+            >
+              <Picker.Item label="Week 1" value="1" />
+              <Picker.Item label="Week 2" value="2" />
+            </Picker>
+          </View>
+
+
+        </View>
+        {/* Color representatiosn */}
+        <View style={styles.colorsBox}>
+
+          <View style={styles.colorBox}>
+            <View style={styles.winIcon}></View><Text style={styles.winTitle}>Win</Text>
+          </View>
+
+          <View style={styles.colorBox}>
+            <View style={styles.loseIcon}></View><Text style={styles.loseTitle}>Lose</Text>
+          </View>
+
+          <View style={styles.colorBox}>
+            <View style={styles.tieIcon}></View><Text style={styles.winTitle}>Tie</Text>
+          </View>
+
+          <View style={styles.colorBox}>
+            <View style={styles.pendingIcon}></View><Text style={styles.loseTitle}>In progress</Text>
+          </View>
+
+          <View style={styles.colorBox}>
+            <View style={styles.openIcon}></View><Text style={styles.winTitle}>Open</Text>
+          </View>
+
         </View>
       </View>
     );
@@ -66,19 +96,21 @@ class Weeks extends React.Component {
 
 const styles = StyleSheet.create({
   root: {
-    flexDirection: 'row',
     paddingLeft: 5,
     paddingRight: 5,
     paddingTop: 25,
     borderBottomWidth: 1,
     borderColor: '#efefef',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     backgroundColor: 'white',
     marginBottom: 10,
     position: 'absolute',
-    top: 0, left: 0, right: 0, height: 80,
+    top: 0, left: 0, right: 0, height: 100,
     elevation: 8
+  },
+  userLeagueWeekBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   userLeague: {
     flexDirection: 'row',
@@ -90,7 +122,48 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center'
   },
-
+  colorsBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderColor: '#efefef',
+    paddingTop: 2
+  },
+  colorBox: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  winIcon: {
+    width: 15,
+    height: 15,
+    backgroundColor: Colors.repColors.win,
+    marginRight: 3,
+  },
+  loseIcon: {
+    width: 15,
+    height: 15,
+    backgroundColor: Colors.repColors.lose,
+    marginRight: 3,
+  },
+  tieIcon: {
+    width: 15,
+    height: 15,
+    backgroundColor: Colors.repColors.tie,
+    marginRight: 3,
+  },
+  pendingIcon: {
+    width: 15,
+    height: 15,
+    backgroundColor: Colors.repColors.pending,
+    marginRight: 3,
+  },
+  openIcon: {
+    width: 15,
+    height: 15,
+    marginRight: 3,
+    borderWidth: 1,
+    borderColor: '#dedede'
+  }
 });
 
 const mapStateToProps = (state) => {

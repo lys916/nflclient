@@ -48,7 +48,7 @@ class CreateLeagueScreen extends React.Component {
             const fieldTop = pageY;
             const gap = (windowHeight - keyboardHeight) - (fieldTop + fieldHeight);
             if (gap >= (0 + 100)) {
-                console.log('no gap');
+                // console.log('no gap');
                 return;
             }
             // console.log('gap', gap);

@@ -48,13 +48,13 @@ import axios from 'axios';
 // }
 
 export const fetchLeague = (id) => {
-    console.log('action fetching league');
+    // console.log('action fetching league');
     return (dispatch) => {
         dispatch({
             type: 'FETCHING_LEAGUE'
         });
         return axios.get(`http://192.168.1.67:5000/league/fetch/${id}`).then(res => {
-            console.log('league fetched from server', res.data);
+            // console.log('league fetched from server', res.data);
             dispatch({
                 type: 'LEAGUE_FETCHED',
                 payload: res.data

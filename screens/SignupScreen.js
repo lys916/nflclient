@@ -18,7 +18,7 @@ export default class Signup extends React.Component {
     }
 
     login = async () => {
-        console.log('user signing up');
+        // console.log('user signing up');
         const { name, email, password } = this.state;
         const user = { name, email, password };
         const res = await axios.post(`http://192.168.1.67:5000/user/signup`, user);

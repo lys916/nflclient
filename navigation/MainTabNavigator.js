@@ -15,7 +15,10 @@ const HomeStack = createStackNavigator({
 HomeStack.navigationOptions = {
   tabBarLabel: 'Games',
   tabBarOptions: {
-    labelStyle: { fontSize: 15 },
+    labelStyle: { fontSize: 15, paddingBottom: 3 },
+    style: {
+      height: 55
+    }
   },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
@@ -37,7 +40,10 @@ const LinksStack = createStackNavigator({
 LinksStack.navigationOptions = {
   tabBarLabel: 'Picks',
   tabBarOptions: {
-    labelStyle: { fontSize: 15 },
+    labelStyle: { fontSize: 15, paddingBottom: 3 },
+    style: {
+      height: 55
+    }
   },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
@@ -55,7 +61,10 @@ const StandingsStack = createStackNavigator({
 StandingsStack.navigationOptions = {
   tabBarLabel: 'Standings',
   tabBarOptions: {
-    labelStyle: { fontSize: 15 },
+    labelStyle: { fontSize: 15, paddingBottom: 3 },
+    style: {
+      height: 55
+    }
   },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
@@ -73,7 +82,10 @@ const SettingsStack = createStackNavigator({
 SettingsStack.navigationOptions = {
   tabBarLabel: 'Settings',
   tabBarOptions: {
-    labelStyle: { fontSize: 15 },
+    labelStyle: { fontSize: 15, paddingBottom: 3 },
+    style: {
+      height: 55
+    }
   },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon

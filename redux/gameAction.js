@@ -47,18 +47,21 @@ import axios from 'axios';
 //     }
 // }
 
-export const fetchGames = (week) => {
+export const fetchGames = (week, league) => {
     // console.log('action week', week);
     return (dispatch) => {
         dispatch({
             type: 'FETCHING_GAMES'
         });
+        // console.log('GETTING GAMES');
         return axios.get(`http://192.168.1.67:5000/game/fetch/${week}`).then(res => {
             // console.log('after fetched gameXXXXXXXXXX', res.data);
+            // console.log('GOT GAMES', Date.now());
             dispatch({
                 type: 'GAMES_FETCHED',
                 payload: res.data
             });
+            return true;
 
         });
     }

@@ -23,6 +23,7 @@ export default class App extends React.Component {
   };
 
   getUser = async () => {
+    console.log('in app.js.. getUser async');
     try {
       const value = await AsyncStorage.getItem('user');
       return value;
@@ -36,12 +37,14 @@ export default class App extends React.Component {
     this.setState({ currentWeek: week });
   }
   render() {
+    console.log('in app.js.. render');
     const screenProps = {
       currentWeek: this.state.currentWeek,
       changeWeek: this.changeWeek
     }
-    console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', screenProps);
+    // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', screenProps);
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
+      console.log('in app.js.. loading not complete');
       return (
         <AppLoading
           startAsync={this._loadResourcesAsync}
@@ -50,6 +53,7 @@ export default class App extends React.Component {
         />
       );
     } else {
+      console.log('in app.js.. loading completed');
       return (
         <Provider store={store}>
           <View style={styles.container}>
@@ -63,6 +67,7 @@ export default class App extends React.Component {
   }
 
   _loadResourcesAsync = async () => {
+    console.log('in app.js.. start loadResourceAsync');
     return Promise.all([
       Asset.loadAsync([
         require('./assets/images/robot-dev.png'),
@@ -85,7 +90,9 @@ export default class App extends React.Component {
   };
 
   _handleFinishLoading = () => {
+    console.log('in app.js.. finish loading');
     this.setState({ isLoadingComplete: true });
+
   };
 }
 

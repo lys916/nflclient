@@ -38,23 +38,27 @@ class StandingsScreen extends React.Component {
 		header: null
 	};
 
-	getRankings = (picks) => {
+	getRankings = (picks, users) => {
+
 		const Main = {};
+		users.forEach(user => {
+			// initialize all user for ranking
+			Main[user._id] = {
+				user,
+				win: 0,
+				tie: 0,
+				loss: 0
+			}
+		});
 		picks.forEach(pick => {
-			// if main object doesn't already have this user yet
-			if (!Main[pick.user._id]) {
-				// if game is not null - has been started
-				if (pick.game.winner !== null || pick.game.winner !== 'pending') {
-					// initialize standing sub object
-					Main[pick.user._id] = {
-						user: pick.user,
-						win: 0,
-						tie: 0,
-						loss: 0
-					}
+
+
+			// if game has been decided
+			if (pick.game.winner !== null) {
+				if (pick.game.winner !== 'pending') {
 
 					if (pick.game.winner === 'tie') {
-						Main[pick.user_id].tie++;
+						Main[pick.user._id].tie++;
 					}
 					else if (pick.game.winner === pick.selected) {
 						Main[pick.user._id].win++;
@@ -62,36 +66,38 @@ class StandingsScreen extends React.Component {
 					else {
 						Main[pick.user._id].loss++;
 					}
-
 				}
-				// if user already exist in the Main object
-			}
-			else {
-				if (pick.game.winner !== null) {
-					if (pick.game.winner !== 'pending') {
-						if (pick.game.winner === 'tie') {
-							Main[pick.user._id].tie++;
-						}
-						else if (pick.game.winner === pick.selected) {
-							Main[pick.user._id].win++;
-						}
-						else {
-							Main[pick.user._id].loss++;
-						}
-					}
 
-				}
+
 			}
+			// // if user already exist in the Main object
+
+			// if (pick.game.winner !== null) {
+			// 	if (pick.game.winner !== 'pending') {
+			// 		if (pick.game.winner === 'tie') {
+			// 			Main[pick.user._id].tie++;
+			// 		}
+			// 		else if (pick.game.winner === pick.selected) {
+			// 			Main[pick.user._id].win++;
+			// 		}
+			// 		else {
+			// 			Main[pick.user._id].loss++;
+			// 		}
+			// 	}
+
+			// }
+
 
 
 		});
-		return Object.values(Main);
+
+		return Object.values(Main).sort(function (a, b) { return b.win - a.win });
 	}
 
 	render() {
 		// console.log('PICKS: ', this.props.picks);
-		const rankings = this.getRankings(this.props.picks);
-		console.log('ARRAY RANKINGS', rankings);
+		const rankings = this.getRankings(this.props.picks, this.props.users);
+		// console.log('ARRAY RANKINGS', rankings);
 		return (
 			<ScrollView style={styles.container}>
 				<View style={styles.headerBox}>

@@ -48,13 +48,16 @@ export const updatePick = (id) => {
 }
 
 export const getPicks = (league) => {
-    console.log('action attemping to fetch picks', league);
+    // console.log('action attemping to fetch picks', league);
     return (dispatch) => {
         dispatch({
             type: 'FETCHING_PICKS'
         });
+        // console.log('GETTING PICKS');
+        const before = Date.now();
         return axios.post(`http://192.168.1.67:5000/pick/fetch`, { league }).then(res => {
             // console.log('got picks from server', res.data);
+            // console.log('GOT PICKS', Date.now());
             dispatch({
                 type: 'PICKS_FETCHED',
                 payload: res.data

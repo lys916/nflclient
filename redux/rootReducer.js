@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import pickReducer from './pickReducer';
 import gameReducer from './gameReducer';
 import leagueReducer from './leagueReducer';
+import loaderReducer from './loaderReducer';
 // import transactionReducer from './transactionReducer';
 import userReducer from './userReducer';
 // import otherReducer from './otherReducer';
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
     picks: pickReducer,
     games: gameReducer,
     league: leagueReducer,
+    loader: loaderReducer,
     // transactions: transactionReducer,
     users: userReducer,
     // others: otherReducer,

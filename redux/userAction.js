@@ -33,13 +33,13 @@ import axios from 'axios';
 // }
 
 export const fetchUsers = (leagueId) => {
-    console.log('action fetching for users');
+    // console.log('action fetching for users');
     return (dispatch) => {
         dispatch({
             type: 'FETCHING_USERS'
         });
         return axios.get(`http://192.168.1.67:5000/user/byLeagueId/${leagueId}`).then(res => {
-            console.log('got users from server');
+            // console.log('got users from server');
             dispatch({
                 type: 'FETCHED_USERS',
                 payload: res.data
