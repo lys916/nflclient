@@ -67,11 +67,12 @@ class JoinLeagueScreen extends React.Component {
   signOut = async () => {
     await AsyncStorage.clear();
     const userToken = await AsyncStorage.getItem('user');
-    console.log('user auth after clear', userToken);
+    // console.log('user auth after clear', userToken);
     this.props.navigation.navigate('Login');
   };
   render() {
-    showUserFromStorage('join league screen');
+
+    // showUserFromStorage('join league screen');
     return (
       <ScrollView style={styles.root}>
         <View>

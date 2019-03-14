@@ -1,41 +1,46 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Platform, ScrollView, StyleSheet, View, Text, Picker, AsyncStorage } from 'react-native';
+import { StyleSheet, View, Text, Picker, AsyncStorage } from 'react-native';
 import { fetchGames } from '../redux/gameAction';
+import { fetchSeason } from '../redux/userAction';
 import { fetchLeague } from '../redux/leagueAction';
-import { fetchUsers } from '../redux/userAction';
-
+import { NavigationActions } from 'react-navigation';
 import { Icon } from 'native-base';
 
 import Colors from '../constants/Colors';
 
 class Weeks extends React.Component {
   state = {
-    user: {}
+    user: {},
+    week: null
   }
 
   async componentDidMount() {
+
+    //get user to display, league object does not single user info
     const jsonUser = await AsyncStorage.getItem('user');
     const user = JSON.parse(jsonUser);
     this.setState({ user });
-    //fetch game
-    const result = await this.props.fetchGames(this.props.screenProps.currentWeek, user.currentLeague);
 
-    //fetch league and users
-    if (user.currentLeague) {
-      this.props.fetchLeague(user.currentLeague);
-      this.props.fetchUsers(user.currentLeague);
-    } else {
-      alert("You don't belong to any league yet. You will get redirected to join a league.");
-    }
+    //   if (league.weeks[0].value > league.season.currentWeek.value) {
+    //     this.setState({ viewWeek: league.weeks[0].name });
+    //   } else {
+    //     this.setState({ viewWeek: league.season.currentWeek.name });
+    //   }
+
   }
-  handleValueChange = (week) => {
-    // console.log(week);
+  handleWeekChange = (week) => {
+
     this.props.screenProps.changeWeek(week);
-    this.props.fetchGames(week);
+    const setParamsAction = NavigationActions.setParams({
+      params: { value: week },
+      // key: 'screen-123',
+    });
+    this.props.navigation.dispatch(setParamsAction);
   }
   render() {
+
     return (
       <View style={styles.root}>
         <View style={styles.userLeagueWeekBox} >
@@ -53,14 +58,22 @@ class Weeks extends React.Component {
 
           <View style={styles.weekBox}>
             <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='calendar' />
+            {/* ??? when change selected value to ...viewWeek.name, it doesn't work.. why??? */}
+            {/* when changed to just ...screenProps.viewWeek, it works */}
             <Picker
-              selectedValue={this.props.screenProps.currentWeek}
-              style={{ height: 50, width: 120 }}
-              onValueChange={(week) => { this.handleValueChange(week) }}
+              selectedValue={this.state.week}
+              style={{ height: 50, width: 142 }}
+              onValueChange={(week) => { this.handleWeekChange(week) }}
             >
-              <Picker.Item label="Week 1" value="1" />
-              <Picker.Item label="Week 2" value="2" />
+              {
+                this.props.league.weeks.map(week => {
+                  return (
+                    <Picker.Item label={week.name} value={week} key={week.value} />
+                  );
+                })
+              }
             </Picker>
+
           </View>
 
 
@@ -99,13 +112,11 @@ const styles = StyleSheet.create({
     paddingLeft: 5,
     paddingRight: 5,
     paddingTop: 25,
-    borderBottomWidth: 1,
-    borderColor: '#efefef',
+
     backgroundColor: 'white',
-    marginBottom: 10,
-    position: 'absolute',
-    top: 0, left: 0, right: 0, height: 100,
-    elevation: 8
+    // position: 'absolute',
+    // top: 0, left: 0, right: 0, height: 100,
+    elevation: 6,
   },
   userLeagueWeekBox: {
     flexDirection: 'row',
@@ -125,8 +136,9 @@ const styles = StyleSheet.create({
   colorsBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderColor: '#efefef',
+    // borderTopWidth: 1,
+    // borderColor: '#efefef',
+    backgroundColor: '#efefef',
     paddingTop: 2
   },
   colorBox: {
@@ -162,7 +174,7 @@ const styles = StyleSheet.create({
     height: 15,
     marginRight: 3,
     borderWidth: 1,
-    borderColor: '#dedede'
+    borderColor: '#aaaaaa'
   }
 });
 
@@ -170,8 +182,10 @@ const mapStateToProps = (state) => {
   return {
     // picks: state.picks,
     // others: state.others
-    league: state.league
+    league: state.league,
+    season: state.season
   }
 }
 
-export default connect(mapStateToProps, { fetchGames, fetchLeague, fetchUsers })(Weeks);
+export default connect(mapStateToProps, { fetchGames, fetchLeague, fetchSeason })(Weeks);
+

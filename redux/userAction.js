@@ -48,3 +48,24 @@ export const fetchUsers = (leagueId) => {
         });
     }
 }
+
+export const fetchSeason = () => {
+    // console.log('action week', week);
+    return (dispatch) => {
+        dispatch({
+            type: 'FETCHING_SEASON'
+        });
+        // console.log('GETTING GAMES');
+        return axios.get(`http://192.168.1.67:5000/season/`).then(res => {
+            // console.log('after fetched gameXXXXXXXXXX', res.data);
+            // console.log('GOT GAMES', Date.now());
+            dispatch({
+                type: 'SEASON_FETCHED',
+                payload: res.data
+            });
+
+            return res.data;
+
+        });
+    }
+}

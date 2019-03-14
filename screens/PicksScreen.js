@@ -3,10 +3,11 @@ import { connect } from 'react-redux';
 import Weeks from '../components/Weeks';
 import images from '../images';
 import _ from 'underscore';
-
-import { ScrollView, View, StyleSheet, Image, Text, Switch, Slider } from 'react-native';
+import { fetchGames } from '../redux/gameAction';
+import { fetchLeague } from '../redux/leagueAction';
+import { ScrollView, View, StyleSheet, Image, Text, Switch, Slider, RefreshControl, AsyncStorage } from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
-
+import Colors from '../constants/Colors';
 
 import {
   Container, StatusBar, Header, Segment, Button,
@@ -18,13 +19,32 @@ import {
 
 
 class Picks extends React.Component {
-  static navigationOptions = {
-    header: null
-  };
+  static navigationOptions = ({ navigation }) => {
+    // navigation.addListener('willFocus', () => {
+    //   const screenProps = navigation.getScreenProps();
+    //   screenProps.changeScreen('picks');
+    //   console.log('Listener revoke');
+    // });
+    return { header: null }
+  }
 
   state = {
     gameView: true,
-    playerView: false
+    playerView: false,
+    refreshing: false,
+    week: null
+  }
+
+
+  // componentWillReceiveProps(nextProps) {
+  //   console.log('WILL RECEIVE PROPS', nextProps.screenProps);
+  //   this.setState({ week: nextProps.screenProps.viewWeek.name });
+  // }
+
+  componentDidMount() {
+    // this.props.navigation.addListener('willFocus', (route) => {
+    //   this.props.screenProps.changeScreen('picks');
+    // });
   }
 
   toggleView = () => {
@@ -74,18 +94,47 @@ class Picks extends React.Component {
 
   }
 
+  _onRefresh = async () => {
+    const jsonUser = await AsyncStorage.getItem('user');
+    const user = JSON.parse(jsonUser);
+
+    this.setState({ refreshing: true });
+    await this.props.fetchLeague(user.currentLeague);
+    this.setState({ refreshing: false });
+  }
+
   render() {
-    const { games } = this.props;
+    console.log('Pick Screen navigation', this.props.navigation.state);
+    const { league } = this.props;
 
-    this.addUserListToGame(games, this.props.picks);
+    const games = league.games.filter(game => {
+      // console.log(game.week.value, this.props.screenProps.viewWeek.value);
+      return game.week === this.props.screenProps.viewWeek.value;
+    });
+    // console.log('after filter len', games.length);
+
+
+
+    const picks = league.picks.filter(pick => {
+      return pick.game.week === this.props.screenProps.viewWeek.value;
+    });
+
+    this.addUserListToGame(games, picks);
+    // console.log('pick screen nagivation', this.props.navigation);
     return (
-      <ScrollView style={styles.root} stickyHeaderIndices={[0]}>
-        {/* make week sticky, has to have Text component in order to work */}
-        <View style={{ elevation: 10 }}>
-          <Weeks screenProps={this.props.screenProps} />
-          <Text></Text>
-        </View>
+      <ScrollView style={styles.root} stickyHeaderIndices={[0]}
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this._onRefresh}
+          />
+        }
+      >
+        {/* sticky weeks */}
 
+        <View style={{ elevation: 10 }}>
+          <Weeks screenProps={this.props.screenProps} navigation={this.props.navigation} />
+        </View>
 
         <View style={styles.viewBox}>
           <View style={styles.gameView}>
@@ -241,7 +290,7 @@ const styles = StyleSheet.create({
   viewBox: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 105,
+    paddingTop: 10
   },
   gameView: {
     flexDirection: 'row',
@@ -257,9 +306,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     marginLeft: 20
-  },
-  card: {
-    marginBottom: 20
   },
   gameBox: {
     flexDirection: 'row',
@@ -306,7 +352,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderColor: '#cccccc',
     alignItems: 'center',
-    backgroundColor: '#dedede'
+    backgroundColor: Colors.pendingColor
+
   },
   homePending: {
     flexDirection: 'row',
@@ -316,7 +363,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingLeft: 10,
     alignItems: 'center',
-    backgroundColor: '#dedede'
+    backgroundColor: Colors.pendingColor
   },
   roadLose: {
     flexDirection: 'row',
@@ -326,7 +373,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingLeft: 10,
     alignItems: 'center',
-    backgroundColor: '#ffe2e2'
+    backgroundColor: Colors.loseColor
   },
   homeLose: {
     flexDirection: 'row',
@@ -336,7 +383,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingLeft: 10,
     alignItems: 'center',
-    backgroundColor: '#ffe2e2'
+    backgroundColor: Colors.loseColor
   },
   roadWin: {
     flexDirection: 'row',
@@ -346,7 +393,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingLeft: 10,
     alignItems: 'center',
-    backgroundColor: '#e5ffe2'
+    backgroundColor: Colors.winColor
   },
   homeWin: {
     flexDirection: 'row',
@@ -356,7 +403,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingLeft: 10,
     alignItems: 'center',
-    backgroundColor: '#e5ffe2'
+    backgroundColor: Colors.winColor
   },
   roadTie: {
     flexDirection: 'row',
@@ -368,7 +415,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderColor: '#dedede',
     alignItems: 'center',
-    backgroundColor: '#e2edff'
+    backgroundColor: Colors.tieColor
   },
   homeTie: {
     flexDirection: 'row',
@@ -379,7 +426,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     alignItems: 'center',
     borderColor: '#dedede',
-    backgroundColor: '#e2edff'
+    backgroundColor: Colors.tieColor
   },
 
 
@@ -388,12 +435,12 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   roadPlayersBox: {
-    padding: 10,
+    padding: 5,
     borderRightWidth: 1,
-    borderColor: '#dedede'
+    borderColor: '#dedede',
   },
   homePlayersBox: {
-    padding: 10,
+    padding: 5,
 
   },
   playerBox: {
@@ -411,10 +458,9 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
-    picks: state.picks,
-    games: state.games,
+    league: state.league
     // others: state.others
   }
 }
 
-export default connect(mapStateToProps, {})(Picks);
+export default connect(mapStateToProps, { fetchGames, fetchLeague })(Picks);

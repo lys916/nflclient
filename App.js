@@ -2,6 +2,7 @@ import React from 'react';
 import { Platform, StatusBar, StyleSheet, View, Text, AsyncStorage } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
+import Weeks from './components/Weeks';
 
 
 // redux stuff
@@ -13,17 +14,16 @@ import rootReducer from './redux/rootReducer';
 const store = createStore(
   rootReducer,
   applyMiddleware(thunk)
-
 );
 
 export default class App extends React.Component {
   state = {
     isLoadingComplete: false,
-    currentWeek: '1'
+    viewWeek: {},
+    screen: 'games'
   };
 
   getUser = async () => {
-    console.log('in app.js.. getUser async');
     try {
       const value = await AsyncStorage.getItem('user');
       return value;
@@ -34,17 +34,20 @@ export default class App extends React.Component {
   }
 
   changeWeek = (week) => {
-    this.setState({ currentWeek: week });
+    this.setState({ viewWeek: week });
+  }
+
+  changeScreen = (screen) => {
+    this.setState({ screen });
   }
   render() {
-    console.log('in app.js.. render');
     const screenProps = {
-      currentWeek: this.state.currentWeek,
-      changeWeek: this.changeWeek
+      changeWeek: this.changeWeek,
+      viewWeek: this.state.viewWeek,
+      changeScreen: this.changeScreen,
+      screen: this.state.screen
     }
-    // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', screenProps);
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
-      console.log('in app.js.. loading not complete');
       return (
         <AppLoading
           startAsync={this._loadResourcesAsync}
@@ -53,11 +56,12 @@ export default class App extends React.Component {
         />
       );
     } else {
-      console.log('in app.js.. loading completed');
       return (
         <Provider store={store}>
-          <View style={styles.container}>
+          {/* {this.state.screen === 'games' || this.state.screen === 'picks' ? <Weeks screenProps={screenProps} /> : null} */}
 
+
+          <View style={styles.container}>
             {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
             <AppNavigator screenProps={screenProps} />
           </View>
@@ -67,7 +71,6 @@ export default class App extends React.Component {
   }
 
   _loadResourcesAsync = async () => {
-    console.log('in app.js.. start loadResourceAsync');
     return Promise.all([
       Asset.loadAsync([
         require('./assets/images/robot-dev.png'),
@@ -90,7 +93,6 @@ export default class App extends React.Component {
   };
 
   _handleFinishLoading = () => {
-    console.log('in app.js.. finish loading');
     this.setState({ isLoadingComplete: true });
 
   };

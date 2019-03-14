@@ -5,25 +5,25 @@ const pickReducer = (state = [], action) => {
         case 'PICKS_FETCHED':
             return action.payload;
 
-        case 'PICK_CREATED':
-            return [...state, action.payload];
+        // case 'PICK_CREATED':
+        //     return [...state, action.payload];
 
-        case 'PICK_DELETED':
-            const filterDeleted = state.filter(pick => {
-                return pick._id !== action.payload._id;
-            });
-            // console.log('after filted delete', filterDeleted);
-            return filterDeleted;
+        // case 'PICK_DELETED':
+        //     const filterDeleted = state.filter(pick => {
+        //         return pick._id !== action.payload._id;
+        //     });
+        //     // console.log('after filted delete', filterDeleted);
+        //     return filterDeleted;
 
-        case 'PICK_UPDATED':
-            const updateState = state.map(pick => {
-                if (pick._id === action.payload._id) {
-                    return action.payload;
-                } else {
-                    return pick;
-                }
-            });
-            return updateState;
+        // case 'PICK_UPDATED':
+        //     const updateState = state.map(pick => {
+        //         if (pick._id === action.payload._id) {
+        //             return action.payload;
+        //         } else {
+        //             return pick;
+        //         }
+        //     });
+        //     return updateState;
 
         // // insert transaction id into event transactions array
         // case 'TRANSACTION_CREATED':

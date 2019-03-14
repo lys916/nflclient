@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, Icon } from 'react-native';
+import { Platform, Icon, Alert } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
@@ -20,6 +20,9 @@ HomeStack.navigationOptions = {
       height: 55
     }
   },
+  // tabBarOnPress: (e) => {
+  //   e.action.navigate("Main");
+  // },
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
@@ -38,6 +41,13 @@ const LinksStack = createStackNavigator({
 });
 
 LinksStack.navigationOptions = {
+  // tabBarOnPress: ({ navigation, defaultHandler }) => {
+  //   const screenProps = navigation.getScreenProps();
+  //   screenProps.changeScreen('picks');
+  //   defaultHandler();
+  // },
+  lazyLoad: false,
+
   tabBarLabel: 'Picks',
   tabBarOptions: {
     labelStyle: { fontSize: 15, paddingBottom: 3 },

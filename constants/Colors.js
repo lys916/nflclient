@@ -15,11 +15,11 @@ export default {
   winColor: '#e5ffe2',
   loseColor: '#ffc9c9',
   tieColor: '#c9ddff',
-  pendingColor: '#dedede',
+  pendingColor: '#ffebaf',
   repColors: {
     win: '#b0ffa8',
     lose: '#ffa0a0',
     tie: '#99beff',
-    pending: '#c6c6c6'
+    pending: '#ffe8a5'
   }
 };

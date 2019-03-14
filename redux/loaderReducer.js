@@ -1,46 +1,42 @@
 
-const loaderReducer = (state = { loading: false, fetchingPicks: false, fetchingGames: false }, action) => {
+const loaderReducer = (state = { fetchingLeague: false }, action) => {
     switch (action.type) {
 
-        case 'FETCHING_PICKS':
-            console.log('fetching picks');
-            if (state.loading) {
-                console.log('loading, games, picks');
-                return { ...state, fetchingPicks: true };
-            } else {
-                return { ...state, loading: true, fetchingPicks: true };
-            }
+        case 'FETCHING_LEAGUE':
+            return { ...state, fetchingLeague: true }
+        case 'LEAGUE_FETCHED':
+            return { ...state, fetchingLeague: false }
 
 
-        case 'PICKS_FETCHED':
-            console.log('picks fetched');
-
-            if (state.fetchingGames) {
-                return { ...state, fetchingPick: false };
-            } else {
-                console.log('all false');
-                return { ...state, loading: false, fetchingPicks: false };
-            }
-
-        case 'FETCHING_GAMES':
-            console.log('fetching games');
-            if (state.loading) {
-
-                return { ...state, fetchingGame: true };
-            } else {
-                console.log('loading, games');
-                return { ...state, loading: true, fetchingGames: true };
-            }
+        // case 'PICKS_FETCHED':
 
 
-        case 'GAMES_FETCHED':
-            console.log('games fetched');
-            if (state.fetchingPicks) {
-                console.log('loading, picks');
-                return { ...state, fetchingGames: false };
-            } else {
-                return { ...state, loading: false, fetchingGames: false };
-            }
+        //     if (state.fetchingGames) {
+        //         return { ...state, fetchingPick: false };
+        //     } else {
+
+        //         return { ...state, loading: false, fetchingPicks: false };
+        //     }
+
+        // case 'FETCHING_GAMES':
+
+        //     if (state.loading) {
+
+        //         return { ...state, fetchingGame: true };
+        //     } else {
+
+        //         return { ...state, loading: true, fetchingGames: true };
+        //     }
+
+
+        // case 'GAMES_FETCHED':
+
+        //     if (state.fetchingPicks) {
+
+        //         return { ...state, fetchingGames: false };
+        //     } else {
+        //         return { ...state, loading: false, fetchingGames: false };
+        //     }
 
 
 

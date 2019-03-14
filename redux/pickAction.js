@@ -48,7 +48,7 @@ export const updatePick = (id) => {
 }
 
 export const getPicks = (league) => {
-    // console.log('action attemping to fetch picks', league);
+    // console.log('');
     return (dispatch) => {
         dispatch({
             type: 'FETCHING_PICKS'

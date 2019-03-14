@@ -3,43 +3,21 @@ import { connect } from 'react-redux';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
 
-const rankings = [
-	{
-		win: 15,
-		tie: 1,
-		loss: 11,
-		user: {
-			name: 'Lo'
-		},
-		pick: 27
-	},
-	{
-		win: 13,
-		tie: 1,
-		loss: 13,
-		user: {
-			name: 'Sing'
-		},
-		pick: 27
-	},
-	{
-		win: 10,
-		tie: 1,
-		loss: 16,
-		user: {
-			name: 'Ai'
-		},
-		pick: 27
-	}
-];
+
 
 class StandingsScreen extends React.Component {
 	static navigationOptions = {
 		header: null
 	};
 
-	getRankings = (picks, users) => {
+	componentDidMount() {
+		// this.props.navigation.addListener('willFocus', (route) => {
+		// 	this.props.screenProps.changeScreen('standings');
+		// });
+	}
 
+	getRankings = (picks, users) => {
+		// console.log('PICKKKKKKKKKKKKKKKKKK', picks);
 		const Main = {};
 		users.forEach(user => {
 			// initialize all user for ranking
@@ -53,10 +31,10 @@ class StandingsScreen extends React.Component {
 		picks.forEach(pick => {
 
 
-			// if game has been decided
+			// if game has stared or ended
 			if (pick.game.winner !== null) {
 				if (pick.game.winner !== 'pending') {
-
+					// console.log('game decided', pick.game.roadTeam.city);
 					if (pick.game.winner === 'tie') {
 						Main[pick.user._id].tie++;
 					}
@@ -95,8 +73,9 @@ class StandingsScreen extends React.Component {
 	}
 
 	render() {
-		// console.log('PICKS: ', this.props.picks);
-		const rankings = this.getRankings(this.props.picks, this.props.users);
+		// console.log('GAMES: ', this.props.league.games);
+		const { users, picks } = this.props.league;
+		const rankings = this.getRankings(picks, users);
 		// console.log('ARRAY RANKINGS', rankings);
 		return (
 			<ScrollView style={styles.container}>
@@ -173,8 +152,9 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
 	return {
-		users: state.users,
-		picks: state.picks
+		// users: state.users,
+		picks: state.picks,
+		league: state.league
 		// games: state.games,
 		// others: state.others
 	}

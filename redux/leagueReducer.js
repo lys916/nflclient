@@ -1,48 +1,32 @@
-import { AsyncStorage } from 'react-native';
-let userInit = {
-    // logged_in: false,
-    // userName: '',
-    // userId: '',
-    // goal: {}
-
-}
-// const _storeData = async () => {
-//     try {
-//         await AsyncStorage.setItem('user', 'testuser');
-//     } catch (error) {
-//         // Error saving data
-//     }
-// };
-
-// _storeData();
-
-// const _retrieveData = async () => {
-//     try {
-//         const value = await AsyncStorage.getItem('user');
-//         if (value !== null) {
-//             // We have data!!
-//             // console.log(value);
-//             userInit = value
-//         }
-//     } catch (error) {
-//         // Error retrieving data
-//     }
-// };
-
-// _retrieveData();
-
-
-// if user exists in local storage, assign username to user initial name
-// const user = JSON.parse(localStorage.getItem('user'));
-// if (user) {
-//     userInit = user;
-// }
-
-const leagueReducer = (state = {}, action) => {
+const leagueReducer = (state = { weeks: [], games: [], picks: [], users: [], admin: {} }, action) => {
     switch (action.type) {
 
         case 'LEAGUE_FETCHED':
             return action.payload
+
+        case 'GAMES_FETCHED':
+            return { ...state, games: action.payload }
+
+        case 'PICK_CREATED':
+
+            return { ...state, picks: [...state.picks, action.payload] }
+
+        case 'PICK_DELETED':
+            const filterDeleted = state.picks.filter(pick => {
+                return pick._id !== action.payload._id;
+            });
+            // console.log('after filted delete', filterDeleted);
+            return { ...state, picks: filterDeleted };
+
+        case 'PICK_UPDATED':
+            const updateState = state.picks.map(pick => {
+                if (pick._id === action.payload._id) {
+                    return action.payload;
+                } else {
+                    return pick;
+                }
+            });
+            return { ...state, picks: updateState };
 
         // case 'LOGGED_OUT':
         //     return {}

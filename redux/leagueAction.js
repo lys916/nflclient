@@ -1,19 +1,19 @@
 import axios from 'axios';
 
-// export const createPick = (pick) => {
-//     return (dispatch) => {
-//         dispatch({
-//             type: 'CREATING_PICK'
-//         });
-//         return axios.post(`http://192.168.1.67:5000/pick/create`, pick).then(res => {
-//             dispatch({
-//                 type: 'PICK_CREATED',
-//                 payload: res.data
-//             });
-
-//         });
-//     }
-// }
+export const createLeague = (league) => {
+    return (dispatch) => {
+        dispatch({
+            type: 'CREATING_LEAGUE'
+        });
+        return axios.post(`http://192.168.1.67:5000/league/create`, league).then(res => {
+            dispatch({
+                type: 'LEAGUE_FETCHED',
+                payload: res.data.league
+            });
+            return res.data.user;
+        });
+    }
+}
 
 // export const deletePick = (id) => {
 //     return (dispatch) => {
@@ -48,17 +48,17 @@ import axios from 'axios';
 // }
 
 export const fetchLeague = (id) => {
-    // console.log('action fetching league');
+    console.log('fetching league');
     return (dispatch) => {
         dispatch({
             type: 'FETCHING_LEAGUE'
         });
         return axios.get(`http://192.168.1.67:5000/league/fetch/${id}`).then(res => {
-            // console.log('league fetched from server', res.data);
             dispatch({
                 type: 'LEAGUE_FETCHED',
                 payload: res.data
             });
+            return res.data;
 
         });
     }

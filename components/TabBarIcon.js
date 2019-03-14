@@ -3,8 +3,6 @@ import { Icon } from 'expo';
 
 import Colors from '../constants/Colors';
 
-// console.log('xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz', Colors);
-
 export default class TabBarIonicon extends React.Component {
   render() {
     if (this.props.iconType === 'ionicons') {
