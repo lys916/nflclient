@@ -4,7 +4,6 @@ import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
 import Weeks from './components/Weeks';
 
-
 // redux stuff
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
@@ -20,7 +19,8 @@ export default class App extends React.Component {
   state = {
     isLoadingComplete: false,
     viewWeek: {},
-    screen: 'games'
+    screen: 'games',
+    weekLoading: false
   };
 
   getUser = async () => {
@@ -28,7 +28,6 @@ export default class App extends React.Component {
       const value = await AsyncStorage.getItem('user');
       return value;
     } catch (error) {
-      // Error retrieving data
       alert(error);
     }
   }
@@ -36,7 +35,12 @@ export default class App extends React.Component {
   changeWeek = (week) => {
     this.setState({ viewWeek: week });
   }
-
+  setStartingWeek = (week) => {
+    this.setState({ viewWeek: week });
+  }
+  resetWeekLoading = () => {
+    this.setState({ weekLoading: false });
+  }
   changeScreen = (screen) => {
     this.setState({ screen });
   }
@@ -45,7 +49,10 @@ export default class App extends React.Component {
       changeWeek: this.changeWeek,
       viewWeek: this.state.viewWeek,
       changeScreen: this.changeScreen,
-      screen: this.state.screen
+      screen: this.state.screen,
+      weekLoading: this.state.weekLoading,
+      resetWeekLoading: this.resetWeekLoading,
+      setStartingWeek: this.setStartingWeek,
     }
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
       return (
@@ -58,9 +65,6 @@ export default class App extends React.Component {
     } else {
       return (
         <Provider store={store}>
-          {/* {this.state.screen === 'games' || this.state.screen === 'picks' ? <Weeks screenProps={screenProps} /> : null} */}
-
-
           <View style={styles.container}>
             {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
             <AppNavigator screenProps={screenProps} />
@@ -94,10 +98,8 @@ export default class App extends React.Component {
 
   _handleFinishLoading = () => {
     this.setState({ isLoadingComplete: true });
-
   };
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

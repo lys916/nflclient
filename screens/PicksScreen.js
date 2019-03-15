@@ -3,30 +3,18 @@ import { connect } from 'react-redux';
 import Weeks from '../components/Weeks';
 import images from '../images';
 import _ from 'underscore';
-import { fetchGames } from '../redux/gameAction';
 import { fetchLeague } from '../redux/leagueAction';
-import { ScrollView, View, StyleSheet, Image, Text, Switch, Slider, RefreshControl, AsyncStorage } from 'react-native';
-import { ExpoLinksView } from '@expo/samples';
+import { ScrollView, View, StyleSheet, Image, Text, RefreshControl, AsyncStorage } from 'react-native';
 import Colors from '../constants/Colors';
 
 import {
-  Container, StatusBar, Header, Segment, Button,
-  Content, Card, CardItem, CheckBox,
-  Body, Icon, Spinner
+  Card, CheckBox, Icon
 } from 'native-base';
 
-
-
-
 class Picks extends React.Component {
-  static navigationOptions = ({ navigation }) => {
-    // navigation.addListener('willFocus', () => {
-    //   const screenProps = navigation.getScreenProps();
-    //   screenProps.changeScreen('picks');
-    //   console.log('Listener revoke');
-    // });
-    return { header: null }
-  }
+  static navigationOptions = {
+    header: null
+  };
 
   state = {
     gameView: true,
@@ -35,20 +23,7 @@ class Picks extends React.Component {
     week: null
   }
 
-
-  // componentWillReceiveProps(nextProps) {
-  //   console.log('WILL RECEIVE PROPS', nextProps.screenProps);
-  //   this.setState({ week: nextProps.screenProps.viewWeek.name });
-  // }
-
-  componentDidMount() {
-    // this.props.navigation.addListener('willFocus', (route) => {
-    //   this.props.screenProps.changeScreen('picks');
-    // });
-  }
-
   toggleView = () => {
-    // console.log('sldkfj');
     this.setState({
       gameView: !this.state.gameView,
       playerView: !this.state.playerView
@@ -90,8 +65,39 @@ class Picks extends React.Component {
         }
       });
     });
-    // console.log('FIRST XXXXXXXXXXXX', );
+  }
 
+  getPlayerView = (picks, users) => {
+
+    const Main = {};
+
+    users.forEach(user => {
+      // initialize all user for ranking
+      Main[user._id] = {
+        user,
+        winPicks: [],
+        lossPicks: [],
+        tiePicks: [],
+        pendingPicks: [],
+        winCount: 0
+      }
+    });
+    picks.forEach(pick => {
+      // if game has started or ended
+      if (pick.game.winner !== null) {
+        if (pick.game.winner === 'tie') {
+          Main[pick.user._id].tiePicks.push(pick);
+        }
+        else if (pick.game.winner === pick.selected) {
+          Main[pick.user._id].winPicks.push(pick);
+          Main[pick.user._id].winCount++;
+        }
+        else {
+          Main[pick.user._id].lossPicks.push(pick);
+        }
+      }
+    });
+    return Object.values(Main).sort(function (a, b) { return b.winCount - a.winCount });
   }
 
   _onRefresh = async () => {
@@ -104,23 +110,20 @@ class Picks extends React.Component {
   }
 
   render() {
-    console.log('Pick Screen navigation', this.props.navigation.state);
+
     const { league } = this.props;
 
     const games = league.games.filter(game => {
-      // console.log(game.week.value, this.props.screenProps.viewWeek.value);
       return game.week === this.props.screenProps.viewWeek.value;
     });
-    // console.log('after filter len', games.length);
-
-
 
     const picks = league.picks.filter(pick => {
       return pick.game.week === this.props.screenProps.viewWeek.value;
     });
 
     this.addUserListToGame(games, picks);
-    // console.log('pick screen nagivation', this.props.navigation);
+    const playerView = this.getPlayerView(picks, league.users);
+    console.log('PLAYER VIEW', playerView);
     return (
       <ScrollView style={styles.root} stickyHeaderIndices={[0]}
         refreshControl={
@@ -131,7 +134,6 @@ class Picks extends React.Component {
         }
       >
         {/* sticky weeks */}
-
         <View style={{ elevation: 10 }}>
           <Weeks screenProps={this.props.screenProps} navigation={this.props.navigation} />
         </View>
@@ -157,10 +159,8 @@ class Picks extends React.Component {
 
               if (game.roadUserList.length < game.homeUserList.length) {
                 const len = game.homeUserList.length - game.roadUserList.length;
-                // console.log('LEN???', len)
                 dummyArray = _.range(len);
               }
-              // console.log('DUMMY FROM MAP', dummyArray);
               return (
                 <Card key={game._id} style={styles.card}>
 
@@ -182,9 +182,9 @@ class Picks extends React.Component {
                               source={images.teams[game.roadTeam.name]}
                             />
                           </View>
-                          <Text>{game.roadTeam.city}</Text>
+                          <Text style={{ fontSize: 16 }}>{game.roadTeam.city}</Text>
                         </View>
-                        <Text>{game.roadSpread}</Text>
+                        <Text style={{ fontSize: 16 }}>{game.roadSpread}</Text>
                       </View>
 
 
@@ -195,11 +195,11 @@ class Picks extends React.Component {
 
                             <View style={styles.playerBox} key={index}>
                               <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='contact' />
-                              <Text>{user}</Text>
+                              <Text style={styles.userListName}>{user}</Text>
                             </View>
                           );
                         })}
-                        {/* purpose of this dummyArray is to apply right border to road player section if its empty of less than the home section, therefore we have to give the icon white color */}
+                        {/* purpose of this dummyArray is to apply right border to road player section if its empty or less than the home section, therefore we also have to give the icon white color */}
                         {dummyArray.map(i => {
                           return (
                             <View style={styles.playerBox} key={i}>
@@ -209,8 +209,6 @@ class Picks extends React.Component {
                         })}
                       </View>
                     </View>
-
-
 
                     {/* Home Team */}
                     <View style={styles.rightSection}>
@@ -223,9 +221,9 @@ class Picks extends React.Component {
                               source={images.teams[game.homeTeam.name]}
                             />
                           </View>
-                          <Text>{game.homeTeam.city}</Text>
+                          <Text style={{ fontSize: 16 }}>{game.homeTeam.city}</Text>
                         </View>
-                        <Text>{game.homeSpread}</Text>
+                        <Text style={{ fontSize: 16 }}>{game.homeSpread}</Text>
                       </View>
                       {game.homeUserList.length > 0 ?
                         <View style={styles.homePlayersBox}>
@@ -234,37 +232,108 @@ class Picks extends React.Component {
                             return (
                               <View style={styles.playerBox} key={index}>
                                 <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='contact' />
-                                <Text>{user}</Text>
+                                <Text style={styles.userListName}>{user}</Text>
                               </View>
                             );
                           })}
-
                         </View> : null
                       }
-
                     </View>
-
                   </View>
                 </Card>
               );
             })}
-
           </View>
           :
-          // User View
-          <View style={styles.table}>
-            <Text style={styles.username}>Lo Saephan</Text>
+          // Player View Style
+          <View>
+            {playerView.map((player, index) => {
 
-            <View style={styles.headerBox}>
-              <Text style={styles.header}>Games</Text>
-              <Text style={styles.header}>Picks</Text>
-            </View>
 
-            <View style={styles.dataBox}>
-              <Text style={styles.data}>Patriots -7 at Rams +7</Text>
-              <Text style={styles.data}>Patriots -7</Text>
-            </View>
+              return (
+                <Card key={index} style={styles.playerCard}>
+                  {/* player name */}
+                  <View style={styles.playerViewBox}>
+                    <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='contact' />
+                    <Text style={styles.playerName}>{player.user.name}</Text>
+                  </View>
 
+                  <View style={styles.pickBox}>
+                    {player.winPicks.map(pick => {
+                      // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', pick.selected)
+                      return (
+                        <View key={pick._id} style={styles.winImage}>
+                          {/* <Text>{pick.game[pick.selected + 'Team'].city}</Text> */}
+                          <Image
+                            style={{ height: 30, width: 30, marginRight: 4 }}
+                            resizeMode="contain"
+                            source={images.teams[pick.game[pick.selected + 'Team'].name]}
+                          />
+                          <Text>{pick.game[pick.selected + 'Spread']}</Text>
+                        </View>
+
+                      );
+                    })}
+
+                  </View>
+
+                  <View style={styles.pickBox}>
+                    {player.lossPicks.map(pick => {
+                      // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', pick.selected)
+                      return (
+                        <View key={pick._id} style={styles.loseImage}>
+                          {/* <Text>{pick.game[pick.selected + 'Team'].city}</Text> */}
+                          <Image
+                            style={{ height: 30, width: 30, marginRight: 4 }}
+                            resizeMode="contain"
+                            source={images.teams[pick.game[pick.selected + 'Team'].name]}
+                          />
+                          <Text>{pick.game[pick.selected + 'Spread']}</Text>
+                        </View>
+
+                      );
+                    })}
+                  </View>
+
+                  <View style={styles.pickBox}>
+                    {player.tiePicks.map(pick => {
+                      // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', pick.selected)
+                      return (
+                        <View key={pick._id} style={styles.tieImage}>
+                          {/* <Text>{pick.game[pick.selected + 'Team'].city}</Text> */}
+                          <Image
+                            style={{ height: 30, width: 30, marginRight: 4 }}
+                            resizeMode="contain"
+                            source={images.teams[pick.game[pick.selected + 'Team'].name]}
+                          />
+                          <Text>{pick.game[pick.selected + 'Spread']}</Text>
+                        </View>
+
+                      );
+                    })}
+                  </View>
+
+                  <View style={styles.pickBox}>
+                    {player.pendingPicks.map(pick => {
+                      // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', pick.selected)
+                      return (
+                        <View key={pick._id} style={styles.pendingImage}>
+                          {/* <Text>{pick.game[pick.selected + 'Team'].city}</Text> */}
+                          <Image
+                            style={{ height: 30, width: 30, marginRight: 4 }}
+                            resizeMode="contain"
+                            source={images.teams[pick.game[pick.selected + 'Team'].name]}
+                          />
+                          <Text>{pick.game[pick.selected + 'Spread']}</Text>
+                        </View>
+
+                      );
+                    })}
+                  </View>
+
+                </Card>
+              );
+            })}
           </View>
         }
       </ScrollView>
@@ -316,8 +385,9 @@ const styles = StyleSheet.create({
   rightSection: {
     width: '50%',
   },
-
-
+  userListName: {
+    fontSize: 16
+  },
   roadOpen: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -453,14 +523,57 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: 'white'
+  },
+
+  // Player View
+  playerCard: {
+    paddingBottom: 13,
+    marginBottom: 15
+  },
+  playerViewBox: {
+    padding: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#efefef'
+  },
+  playerName: {
+    fontSize: 17
+  },
+  pickBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  },
+
+  winImage: {
+    padding: 10,
+    backgroundColor: Colors.winColor,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  loseImage: {
+    padding: 10,
+    backgroundColor: Colors.loseColor, flexDirection: 'row',
+    alignItems: 'center'
+  },
+  tieImage: {
+    padding: 10,
+    backgroundColor: Colors.tieColor, flexDirection: 'row',
+    alignItems: 'center'
+  },
+
+  pendingImage: {
+    padding: 10,
+    backgroundColor: Colors.pendingColor, flexDirection: 'row',
+    alignItems: 'center'
   }
+
 });
+
 
 const mapStateToProps = (state) => {
   return {
     league: state.league
-    // others: state.others
   }
 }
-
-export default connect(mapStateToProps, { fetchGames, fetchLeague })(Picks);
+export default connect(mapStateToProps, { fetchLeague })(Picks);

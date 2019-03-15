@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { Platform, ScrollView, StyleSheet, View, Text, Picker, AsyncStorage } from 'react-native';
-import { fetchGames } from '../redux/gameAction';
 import { fetchLeague } from '../redux/leagueAction';
 import { fetchUsers } from '../redux/userAction';
 
@@ -40,4 +39,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps, { fetchGames, fetchLeague, fetchUsers })(Weeks);
+export default connect(mapStateToProps, { fetchLeague, fetchUsers })(Weeks);

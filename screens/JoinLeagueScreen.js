@@ -5,7 +5,7 @@ import axios from 'axios';
 import { showUserFromStorage } from '../helperFunctions';
 import { Button } from 'react-native-elements';
 import {
-  Image, TextInput, TouchableHighlight,
+  Image, TextInput, TouchableHighlight, TouchableNativeFeedback,
   Platform, AsyncStorage,
   ScrollView,
   StyleSheet,
@@ -38,7 +38,7 @@ class JoinLeagueScreen extends React.Component {
   }
 
   joinLeague = async () => {
-    // console.log('wants to join league', this.state);
+
     const { id, pin } = this.state;
     if (id !== '' || pin !== '') {
       const jsonUser = await AsyncStorage.getItem('user');
@@ -74,69 +74,112 @@ class JoinLeagueScreen extends React.Component {
 
     // showUserFromStorage('join league screen');
     return (
-      <ScrollView style={styles.root}>
-        <View>
-          <Text>User: {this.state.user.name}</Text>
+      <View style={styles.root}>
+        <View style={styles.header}>
+          <Text>You're logged in as: {this.state.user.name}</Text>
           <Text onPress={this.signOut}>Sign out</Text>
         </View>
-        <Text>Join a league</Text>
-        <Text>Ask your league commissioner for league ID and PIN</Text>
 
-        <Text>Enter League ID</Text>
+        <Text style={styles.logo}>
+          Super Pick'em
+        </Text>
+
+        <Text style={styles.label}>Enter League ID</Text>
         <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+          style={styles.input}
           onChangeText={(id) => this.setState({ id })}
           value={this.state.text}
         />
 
-        <Text>Enter League PIN</Text>
+        <Text style={styles.label}>Enter League PIN</Text>
         <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+          style={styles.input}
           onChangeText={(pin) => this.setState({ pin })}
           value={this.state.text}
         />
 
-        {/* <TouchableHighlight
-          style={{
-            borderRadius: 10,
-            backgroundColor: "yellow",
-            marginTop: 20,
-            marginBottom: 20
-          }}>
-          <Button
-            onPress={this.joinLeague}
-            title="Join"
-            color="#841584"
-            accessibilityLabel="Learn more about this purple button"
-            style={{ height: 40 }}
-          />
-        </TouchableHighlight> */}
-        <View style={styles.button}>
-          <Button
-            title="Join League"
-            loading={this.state.loading}
-            raised={true}
-            onPress={this.joinLeague}
-          />
-        </View>
+        <TouchableNativeFeedback onPress={this.joinLeague} underlayColor="white">
+          <View style={styles.button}>
+            <Text style={styles.buttonText}>Join</Text>
+          </View>
+        </TouchableNativeFeedback >
 
-        <Text>Don't have a league? <Text onPress={() => { this.props.navigation.navigate('CreateLeague') }}>Create one!</Text></Text>
+        <Text style={styles.bottomText}>Don't have a league? <Text onPress={() => { this.props.navigation.navigate('CreateLeague') }} style={{ color: '#0061ff' }}>Create one!</Text></Text>
 
-      </ScrollView>
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
-    backgroundColor: '#30343a',
-    padding: 30
+    padding: 20,
+    backgroundColor: 'white'
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    fontSize: 17,
+    color: '#999999'
+  },
+  gameBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderBottomWidth: 1,
+    borderBottomColor: '#efefef',
+    padding: 20
+  },
+  teamBox: {
+    width: '45%',
+  },
+  teamBoxSelected: {
+    width: '45%',
+    textAlign: 'center',
+    borderWidth: 2,
+    borderColor: 'blue'
+  },
+  teamName: {
+    textAlign: 'center'
+  },
+  input: {
+    height: 50,
+    borderColor: '#ababab',
+    borderWidth: 1,
+    fontSize: 20,
+    borderRadius: 5,
+    padding: 3
+  },
+  label: {
+    fontSize: 18,
+    marginTop: 10
   },
   button: {
-    marginTop: 30
-  }
-
+    marginTop: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+    backgroundColor: '#337ab7',
+    borderRadius: 5
+  },
+  buttonText: {
+    padding: 10,
+    fontSize: 18,
+    color: 'white'
+  },
+  bottomText: {
+    fontSize: 17,
+    textAlign: 'center'
+  },
+  textLink: {
+    color: '#337ab7'
+  },
+  logo: {
+    fontSize: 25,
+    textAlign: 'center',
+    marginTop: 30,
+    color: '#337ab7',
+    marginBottom: 10
+  },
 });
 
 const mapStateToProps = (state) => {

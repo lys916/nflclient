@@ -4,8 +4,8 @@ const leagueReducer = (state = { weeks: [], games: [], picks: [], users: [], adm
         case 'LEAGUE_FETCHED':
             return action.payload
 
-        case 'GAMES_FETCHED':
-            return { ...state, games: action.payload }
+        // case 'GAMES_FETCHED':
+        //     return { ...state, games: action.payload }
 
         case 'PICK_CREATED':
 

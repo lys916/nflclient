@@ -6,7 +6,7 @@ import {
   Image, TextInput, Button, KeyboardAvoidingView,
   Platform, Picker, Keyboard, Dimensions, UIManager,
   ScrollView, Animated, TouchableHighlight, AsyncStorage,
-  StyleSheet,
+  StyleSheet, TouchableNativeFeedback,
   Text,
   TouchableOpacity,
   View,
@@ -30,12 +30,20 @@ class CreateLeagueScreen extends React.Component {
     startWeek: '',
     endWeek: '',
     shift: new Animated.Value(0),
-    weekError: ''
+    weekError: '',
+    user: {},
+    nameError: null,
+    pinError: null,
+    startWeekError: null,
+    endWeekError: null
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     this.keyboardDidShowSub = Keyboard.addListener('keyboardDidShow', this.handleKeyboardDidShow);
     this.keyboardDidHideSub = Keyboard.addListener('keyboardDidHide', this.handleKeyboardDidHide);
+    const jsonUser = await AsyncStorage.getItem('user');
+    const user = JSON.parse(jsonUser);
+    this.setState({ user });
   }
 
   handleKeyboardDidShow = (event) => {
@@ -78,10 +86,29 @@ class CreateLeagueScreen extends React.Component {
   }
 
   createLeague = async () => {
+    const { name, pin, startWeek, endWeek, notes, nameError, pinError, startWeekError, endWeekError } = this.state;
+    if (name === '') {
+      this.setState({ nameError: 'Name is required' });
+    } else { this.setState({ nameError: null }) }
+
+    if (pin === '') {
+      this.setState({ pinError: 'Pin is required' });
+    } else if (pin.length !== 4) {
+      this.setState({ pinError: 'Pin must be 4 digits' });
+    } else { this.setState({ pinError: null }) }
+
+    if (startWeek === '') {
+      this.setState({ startWeekError: 'Start week is required' });
+    } else if (startWeek > endWeek) {
+      this.setState({ startWeek: 'Start week must be before end week' });
+    } else { this.setState({ startWeekError: null }) }
+
+    if (endWeek === '') {
+      this.setState({ endWeekError: 'End week is required' });
+    } else { this.setState({ endWEekError: null }) }
 
 
-    const { name, pin, startWeek, endWeek, notes } = this.state;
-    if (name !== '' || pin !== '' || startWeek !== '' || endWeek !== '') {
+    if (!nameError || !pinError || !startWeekError || !endWeekError) {
       const jsonUser = await AsyncStorage.getItem('user');
       const user = JSON.parse(jsonUser);
 
@@ -106,8 +133,6 @@ class CreateLeagueScreen extends React.Component {
       await AsyncStorage.setItem('user', userData);
       this.props.navigation.navigate('Main');
 
-    } else {
-      alert('missing field');
     }
 
   }
@@ -150,28 +175,38 @@ class CreateLeagueScreen extends React.Component {
     return (
       <Animated.View style={[styles.container, { transform: [{ translateY: shift }] }]}>
         <ScrollView style={styles.root}>
-          <Text>Create a league</Text>
+          <View style={styles.header}>
+            <Text>You're logged in as: {this.state.user.name}</Text>
+            <Text onPress={this.signOut}>Sign out</Text>
+          </View>
+          <Text style={styles.logo}>
+            {/* Super Pick'em NFL */}
+            Super Pick'em
+                    </Text>
 
-          <Text>League Name*</Text>
+          <Text style={styles.label}>League Name* <Text style={{ color: 'red', fontSize: 14 }}>{this.state.nameError}</Text></Text>
           <TextInput
-            style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+            style={styles.input}
             onChangeText={(name) => this.setState({ name })}
             value={this.state.text}
           />
 
-          <Text>League PIN*</Text>
+          <Text style={styles.label}>League PIN* <Text style={{ color: 'red', fontSize: 14 }}>{this.state.pinError}</Text></Text>
           <TextInput
-            style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+            style={styles.input}
             onChangeText={(pin) => this.setState({ pin })}
             value={this.state.text}
           />
-
+          <Text style={{ color: 'red', fontSize: 14 }}>{this.state.startWeekError}</Text>
+          <Text style={{ color: 'red', fontSize: 14 }}>{this.state.endWEekError}</Text>
           <View style={styles.weekBox}>
+
             <View>
-              <Text>Start week*</Text>
+
+              <Text style={styles.labelStart}>Start week*</Text>
               <Picker
                 selectedValue={this.state.startWeek}
-                style={{ height: 50, width: 120 }}
+                style={{ height: 50, width: 140 }}
                 onValueChange={(startWeek) => { this.setstartWeek(startWeek) }}
               >
                 <Picker.Item label="Select" value="" />
@@ -186,10 +221,10 @@ class CreateLeagueScreen extends React.Component {
             </View>
             <View>
 
-              <Text>End week*</Text>
+              <Text style={styles.labelEnd}>End week*</Text>
               <Picker
                 selectedValue={this.state.endWeek}
-                style={{ height: 50, width: 120 }}
+                style={{ height: 50, width: 150 }}
                 onValueChange={(endWeek) => { this.setEndWeek(endWeek) }}
               >
                 <Picker.Item label="Select" value="" />
@@ -205,7 +240,7 @@ class CreateLeagueScreen extends React.Component {
           </View>
 
 
-          <Text>League rules or notes (buy-in, payout, fees etc)</Text>
+          <Text style={styles.labelEnd}>League notes ( you can edit it later )</Text>
           <TextInput
             style={styles.textArea}
             onChangeText={(notes) => this.setState({ notes })}
@@ -213,25 +248,16 @@ class CreateLeagueScreen extends React.Component {
             multiline={true}
             numberOfLines={30}
           />
-          <TouchableHighlight
-            style={{
-              borderRadius: 10,
-              backgroundColor: "yellow",
-              marginTop: 20,
-              marginBottom: 20
-            }}>
-            <Button
-              onPress={this.createLeague}
-              title="Create"
-              color="#337ab7"
-              accessibilityLabel="Learn more about this purple button"
-              style={styles.button}
-            />
-          </TouchableHighlight>
+          <TouchableNativeFeedback onPress={this.createLeague} underlayColor="white">
+            <View style={styles.button}>
+              <Text style={styles.buttonText}>Join</Text>
+            </View>
+          </TouchableNativeFeedback >
 
 
 
-          <Text >Already have league? <Text onPress={() => { this.props.navigation.navigate('JoinLeague') }}>Join!</Text></Text>
+
+          <Text style={styles.bottomText}>Already have a league? <Text style={{ color: '#0061ff' }} onPress={() => { this.props.navigation.navigate('JoinLeague') }}>Join!</Text></Text>
 
 
         </ScrollView>
@@ -241,6 +267,9 @@ class CreateLeagueScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  container: {
+
+  },
   root: {
     // flex: 1,
     backgroundColor: '#fff',
@@ -252,14 +281,87 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1
   },
-  button: {
-    marginTop: 10,
-    marginBottom: 10
-  },
   weekBox: {
     flexDirection: 'row',
     justifyContent: 'space-between'
-  }
+  },
+  root: {
+    padding: 20,
+    backgroundColor: 'white'
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    fontSize: 17,
+    color: '#999999'
+  },
+  gameBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderBottomWidth: 1,
+    borderBottomColor: '#efefef',
+    padding: 20
+  },
+  teamBox: {
+    width: '45%',
+  },
+  teamBoxSelected: {
+    width: '45%',
+    textAlign: 'center',
+    borderWidth: 2,
+    borderColor: 'blue'
+  },
+  teamName: {
+    textAlign: 'center'
+  },
+  input: {
+    height: 50,
+    borderColor: '#ababab',
+    borderWidth: 1,
+    fontSize: 20,
+    borderRadius: 5,
+    padding: 3
+  },
+  label: {
+    fontSize: 18,
+    marginTop: 10
+  },
+  labelStart: {
+    fontSize: 18,
+    marginTop: 10,
+    paddingBottom: -10
+  },
+  labelEnd: {
+    fontSize: 18,
+    marginTop: 10
+  },
+  button: {
+    marginTop: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+    backgroundColor: '#337ab7',
+    borderRadius: 5
+  },
+  buttonText: {
+    padding: 10,
+    fontSize: 18,
+    color: 'white'
+  },
+  bottomText: {
+    fontSize: 17,
+    textAlign: 'center'
+  },
+  textLink: {
+    color: '#337ab7'
+  },
+  logo: {
+    fontSize: 25,
+    textAlign: 'center',
+    marginTop: 30,
+    color: '#337ab7',
+    marginBottom: 10
+  },
 });
 
 const mapStateToProps = (state) => {

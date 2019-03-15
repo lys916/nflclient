@@ -4,7 +4,7 @@ import { ExpoConfigView } from '@expo/samples';
 import {
     Image, Platform, ScrollView, StyleSheet, Text,
     TouchableOpacity, View, AsyncStorage, TextInput,
-    Button
+    Button, TouchableNativeFeedback, Alert
 } from 'react-native';
 export default class Signup extends React.Component {
     static navigationOptions = {
@@ -17,7 +17,7 @@ export default class Signup extends React.Component {
         password: ''
     }
 
-    login = async () => {
+    signup = async () => {
         // console.log('user signing up');
         const { name, email, password } = this.state;
         const user = { name, email, password };
@@ -32,52 +32,64 @@ export default class Signup extends React.Component {
         } else {
             const userData = JSON.stringify(res.data);
             await AsyncStorage.setItem('user', userData);
-            alert("Welcome!, let's start by creating or joining a league.");
-            this.props.navigation.navigate('JoinLeague');
+
+            Alert.alert(
+                "Welcome to Super Pick'em.",
+                'Would you like to start by joining a league or creating a new league?',
+                [
+                    {
+                        text: 'CREATE A NEW LEAGUE',
+                        onPress: () => this.props.navigation.navigate('CreateLeague')
+                    },
+                    {
+                        text: 'JOIN A LEAGUE',
+                        onPress: () => this.props.navigation.navigate('JoinLeague')
+                    },
+                ],
+                { cancelable: false },
+            );
+
+
         }
-
-
     };
 
     render() {
-
         /* Go ahead and delete ExpoConfigView and replace it with your
          * content, we just wanted to give you a quick view of your config */
         return (
             <View style={styles.root}>
                 <View>
-                    <Text>
-                        Super Pick'em NFL - Sign up
+                    <Text style={styles.logo}>
+                        Super Pick'em
                     </Text>
                 </View>
-                <Text>Name</Text>
+                <Text style={styles.label}>Name</Text>
                 <TextInput
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                    style={styles.input}
                     onChangeText={(name) => this.setState({ name })}
                     value={this.state.text}
                 />
 
-                <Text>Email</Text>
+                <Text style={styles.label}>Email</Text>
                 <TextInput
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                    style={styles.input}
                     onChangeText={(email) => this.setState({ email })}
                     value={this.state.text}
                 />
 
-                <Text>Password</Text>
+                <Text style={styles.label}>Password</Text>
                 <TextInput
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                    style={styles.input}
                     onChangeText={(password) => this.setState({ password })}
                     value={this.state.text}
                     secureTextEntry={true}
                 />
 
-                <Button
-                    onPress={this.login}
-                    title="Signup"
-                    color="#841584"
-                    accessibilityLabel="Learn more about this purple button"
-                />
+                <TouchableNativeFeedback onPress={this.signup} underlayColor="white">
+                    <View style={styles.button}>
+                        <Text style={styles.buttonText}>Signup</Text>
+                    </View>
+                </TouchableNativeFeedback >
 
                 <Text style={styles.bottomText}>Already have an account? <Text style={styles.textLink} onPress={() => { this.props.navigation.navigate('Login') }}>Login!</Text></Text>
 
@@ -88,7 +100,8 @@ export default class Signup extends React.Component {
 
 const styles = StyleSheet.create({
     root: {
-        padding: 30
+        padding: 20,
+        backgroundColor: 'white'
     },
     gameBox: {
         flexDirection: 'row',
@@ -108,6 +121,44 @@ const styles = StyleSheet.create({
     },
     teamName: {
         textAlign: 'center'
-    }
+    },
+    input: {
+        height: 50,
+        borderColor: '#ababab',
+        borderWidth: 1,
+        fontSize: 20,
+        borderRadius: 5,
+        padding: 3
+    },
+    label: {
+        fontSize: 18,
+        marginTop: 10
+    },
+    button: {
+        marginTop: 20,
+        marginBottom: 20,
+        alignItems: 'center',
+        backgroundColor: '#337ab7',
+        borderRadius: 5
+    },
+    buttonText: {
+        padding: 10,
+        fontSize: 18,
+        color: 'white'
+    },
+    bottomText: {
+        fontSize: 17,
+        textAlign: 'center'
+    },
+    textLink: {
+        color: '#337ab7'
+    },
+    logo: {
+        fontSize: 25,
+        textAlign: 'center',
+        marginTop: 30,
+        color: '#337ab7',
+        marginBottom: 10
+    },
 });
 

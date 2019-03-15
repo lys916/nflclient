@@ -47,25 +47,25 @@ import axios from 'axios';
 //     }
 // }
 
-export const fetchGames = () => {
-    console.log('ACTION FETCHING GAMES');
-    return (dispatch) => {
-        dispatch({
-            type: 'FETCHING_GAMES'
-        });
-        // console.log('GETTING GAMES');
-        return axios.get(`http://192.168.1.67:5000/game/fetch/`).then(res => {
-            // console.log('after fetched gameXXXXXXXXXX', res.data);
-            // console.log('GOT GAMES', Date.now());
-            dispatch({
-                type: 'GAMES_FETCHED',
-                payload: res.data
-            });
-            return res.data;
+// export const fetchGames = () => {
+//     console.log('ACTION FETCHING GAMES');
+//     return (dispatch) => {
+//         dispatch({
+//             type: 'FETCHING_GAMES'
+//         });
+//         // console.log('GETTING GAMES');
+//         return axios.get(`http://192.168.1.67:5000/game/fetch/`).then(res => {
+//             // console.log('after fetched gameXXXXXXXXXX', res.data);
+//             // console.log('GOT GAMES', Date.now());
+//             dispatch({
+//                 type: 'GAMES_FETCHED',
+//                 payload: res.data
+//             });
+//             return res.data;
 
-        });
-    }
-}
+//         });
+//     }
+// }
 
 // export const fetchGameAssets = (week, league) => {
 //     // console.log('ACTION FETCHING GAMES');

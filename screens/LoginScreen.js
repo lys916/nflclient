@@ -15,32 +15,48 @@ export default class LoginScreen extends React.Component {
 
     state = {
         email: '',
-        password: ''
+        password: '',
+        emailError: null,
+        passwordError: null
     }
 
     login = async () => {
         // console.log('user logging in');
-        const { email, password } = this.state;
-        const user = { email, password };
+        const { email, password, emailError, passwordError } = this.state;
+        if (email === '') {
+            await this.setState({ emailError: 'Email is required' });
+        } else { await this.setState({ emailError: null }) }
 
-        const res = await axios.post(`http://192.168.1.67:5000/user/login`, user);
-        // console.log('after login', res.data);
-        if (res.data.errorMessage) {
-            alert(res.data.errorMessage);
-        } else {
-            // save user to storage
-            const userData = JSON.stringify(res.data);
-            await AsyncStorage.setItem('user', userData);
+        if (password === '') {
+            await this.setState({ passwordError: 'Password is required' });
+        } else { await this.setState({ passwordError: null }) }
 
-            if (res.data.currentLeague) {
-                // alert('found current league');
-                this.props.navigation.navigate('Main');
+        if (!this.state.emailError || !this.state.passwordError) {
+
+            const user = { email, password };
+
+            const res = await axios.post(`http://192.168.1.67:5000/user/login`, user);
+            // console.log('after login', res.data);
+            if (res.data.errorMessage) {
+                alert(res.data.errorMessage);
+                this.setState({ email: '', password: '' });
             } else {
-                alert("It doesn't look like you're in any league, start by joining or creating one.");
-                this.props.navigation.navigate('JoinLeague');
-            }
+                // save user to storage
+                const userData = JSON.stringify(res.data);
+                await AsyncStorage.setItem('user', userData);
 
+                if (res.data.currentLeague) {
+                    // alert('found current league');
+                    this.props.navigation.navigate('Main');
+                } else {
+                    alert("It doesn't look like you're in any league, start by joining or creating one.");
+                    this.props.navigation.navigate('JoinLeague');
+                }
+
+            }
         }
+
+
 
     };
 
@@ -57,18 +73,18 @@ export default class LoginScreen extends React.Component {
                 <View>
                     <Text style={styles.logo}>
                         {/* Super Pick'em NFL */}
-                        Transaction Manager
+                        Super Pick'em
                     </Text>
                 </View>
 
-                <Text style={styles.label}>Email</Text>
+                <Text style={styles.label}>Email <Text style={{ color: 'red', fontSize: 14 }}>{this.state.emailError}</Text></Text>
                 <TextInput
                     style={styles.input}
                     onChangeText={(email) => this.setState({ email })}
                     value={this.state.text}
                 />
 
-                <Text style={styles.label}>Password</Text>
+                <Text style={styles.label}>Password <Text style={{ color: 'red', fontSize: 14 }}>{this.state.passwordError}</Text></Text>
                 <TextInput
                     style={styles.input}
                     onChangeText={(password) => this.setState({ password })}
@@ -149,7 +165,7 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     },
     textLink: {
-        color: '#337ab7'
+        color: '#0061ff'
     }
 });
 

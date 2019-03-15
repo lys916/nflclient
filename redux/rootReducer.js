@@ -7,8 +7,8 @@ import seasonReducer from './seasonReducer';
 import userReducer from './userReducer';
 
 const rootReducer = combineReducers({
-    picks: pickReducer,
-    games: gameReducer,
+    // picks: pickReducer,
+    // games: gameReducer,
     league: leagueReducer,
     loader: loaderReducer,
     season: seasonReducer,

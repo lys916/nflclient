@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import { StyleSheet, View, Text, Picker, AsyncStorage } from 'react-native';
-import { fetchGames } from '../redux/gameAction';
 import { fetchSeason } from '../redux/userAction';
 import { fetchLeague } from '../redux/leagueAction';
 import { NavigationActions } from 'react-navigation';
@@ -31,7 +30,6 @@ class Weeks extends React.Component {
 
   }
   handleWeekChange = (week) => {
-
     this.props.screenProps.changeWeek(week);
     const setParamsAction = NavigationActions.setParams({
       params: { value: week },
@@ -58,13 +56,18 @@ class Weeks extends React.Component {
 
           <View style={styles.weekBox}>
             <Icon style={{ fontSize: 20, color: '#777777', marginLeft: 2, marginRight: 5 }} name='calendar' />
-            {/* ??? when change selected value to ...viewWeek.name, it doesn't work.. why??? */}
-            {/* when changed to just ...screenProps.viewWeek, it works */}
+            {/* ??? selectedValue only works with object? -> screenProps.viewWeek */}
+            {/* when changed to screenProps.viewWeek.name, it doesn't work */}
             <Picker
-              selectedValue={this.state.week}
+              selectedValue={this.props.screenProps.viewWeek}
               style={{ height: 50, width: 142 }}
-              onValueChange={(week) => { this.handleWeekChange(week) }}
+              onValueChange={(week) => {
+                console.log('start week change', Date.now());
+                this.props.screenProps.changeWeek(week)
+              }}
             >
+
+
               {
                 this.props.league.weeks.map(week => {
                   return (
@@ -114,8 +117,6 @@ const styles = StyleSheet.create({
     paddingTop: 25,
 
     backgroundColor: 'white',
-    // position: 'absolute',
-    // top: 0, left: 0, right: 0, height: 100,
     elevation: 6,
   },
   userLeagueWeekBox: {
@@ -136,8 +137,6 @@ const styles = StyleSheet.create({
   colorsBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // borderTopWidth: 1,
-    // borderColor: '#efefef',
     backgroundColor: '#efefef',
     paddingTop: 2
   },
@@ -180,12 +179,10 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
-    // picks: state.picks,
-    // others: state.others
     league: state.league,
     season: state.season
   }
 }
 
-export default connect(mapStateToProps, { fetchGames, fetchLeague, fetchSeason })(Weeks);
+export default connect(mapStateToProps, { fetchLeague, fetchSeason })(Weeks);
 

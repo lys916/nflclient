@@ -48,7 +48,7 @@ export const createLeague = (league) => {
 // }
 
 export const fetchLeague = (id) => {
-    console.log('fetching league');
+    // console.log('fetching league');
     return (dispatch) => {
         dispatch({
             type: 'FETCHING_LEAGUE'

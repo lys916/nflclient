@@ -1,33 +1,25 @@
 import React from 'react';
-import { Font } from 'expo';
-import { Ionicons } from '@expo/vector-icons';
 import { connect } from 'react-redux';
 import Colors from '../constants/Colors';
 import Weeks from '../components/Weeks';
 import images from '../images';
 import { fetchLeague } from '../redux/leagueAction';
-import { fetchGames } from '../redux/gameAction';
 import { Card, CardItem, Text, Icon } from 'native-base';
-import { Image, AsyncStorage, ScrollView, StyleSheet, ProgressBarAndroid, TouchableWithoutFeedback, View, Picker, RefreshControl, TouchableNativeFeedback, Alert } from 'react-native';
-import { NavigationEvents } from 'react-navigation';
+import { Image, AsyncStorage, ScrollView, StyleSheet, ProgressBarAndroid, View, RefreshControl, TouchableNativeFeedback, Alert } from 'react-native';
+
+// NOTE** game date and time should be in UTC...
+// so user from different time zone get different game start time
 
 // var date = new Date('6/29/2011 1:00:00 AM UTC');
 // console.log('MY TIME MMMMMMM', date.toString());
-
-
 
 import { createPick, deletePick, getPicks, updatePick } from '../redux/pickAction';
 import { fetchUsers, fetchSeason } from '../redux/userAction';
 
 class HomeScreen extends React.Component {
-  static navigationOptions = ({ navigation }) => {
-    // navigation.addListener('willFocus', () => {
-    //   const screenProps = navigation.getScreenProps();
-    //   screenProps.changeScreen('games');
-    //   console.log('Listener revoke');
-    // });
-    return { header: null }
-  }
+  static navigationOptions = {
+    header: null
+  };
 
   state = {
     loadingIndex: null,
@@ -35,104 +27,52 @@ class HomeScreen extends React.Component {
     refreshing: false,
   }
 
-  // setModalVisible(visible) {
-  //   this.setState({ modalVisible: visible });
-  // }
-
   async componentDidMount() {
-    // this.props.navigation.addListener('willFocus', (route) => {
-    //   this.props.screenProps.changeScreen('games');
-    // });
     this.props.screenProps.changeScreen('games');
     const jsonUser = await AsyncStorage.getItem('user');
     const user = JSON.parse(jsonUser);
-    // set user for refresh fetching games
+
+    // set user for refresh fetching league
     this.setState({ user });
     if (user) {
-      // this.setState({ user });
-
-      // fetch league and season here
-      // so we can use it to set the weekly dropdown
-
-      // if (user.currentLeague) {
-
       const league = await this.props.fetchLeague(user.currentLeague);
-      // const season = await this.props.fetchSeason();
       if (league) {
+        // set initial week for display in weeks component
+        // either set the current nfl week or set the first week for the league
         if (league.weeks[0].value > league.season.currentWeek.value) {
-          this.props.screenProps.changeWeek(league.weeks[0]);
+          this.props.screenProps.setStartingWeek(league.weeks[0]);
         } else {
-          this.props.screenProps.changeWeek(league.season.currentWeek);
+          this.props.screenProps.setStartingWeek(league.season.currentWeek);
         }
       }
-
-
-      // }
-
-      //fetch game
-      // const result = await this.props.fetchGames(user.currentLeague);
-
-      // if (result.) { 
-
-      // }
     }
-
-
-    //before the component renders, we want to load the user for later use
-    // const jsonUser = await AsyncStorage.getItem('user');
-    // const user = JSON.parse(jsonUser);
-    // this.setState({ user });
-
-    // this.props.getPicks(user.currentLeague);
-    //fetch league and user list
-    // if (user.currentLeague) {
-
-    //   // console.log('fetching users', user.currentLeague);
-    //   this.props.fetchUsers(user.currentLeague);
-    // } else {
-    //   alert("You don't belong to any league yet. You will get redirected to join a league.");
-    // }
   }
-
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   console.log('screen props', this.props.screenProps, nextProps.screenProps);
-  //   if (this.props.screenProps.screen !== nextProps.screenProps.screen) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
-
+  // applying game with pick result temporary for display only, it does not effect game data
   addPickToGame = (games, picks) => {
     if (games.length > 0) {
       games.forEach(game => {
-        // to start off, we assume none of the game has been selected
+        // to start off, we reset all game selected to null
         game.selected = null;
         game.localPickId = null;
         game.pickImage = null;
-
-        // assume all games open for selection
+        // set all game results to 'open'
         game.result = 'open';
-
 
         // loop through picks to match the game
         picks.forEach(pick => {
-          // game._id === pick.game._id && 
-          // console.log('ZZZZZZZZZZZZZZZ: ', pick);
-          // alert(user._id);
+          // if this pick matches the game and belongs to the current user
           if (game._id === pick.game._id && pick.user._id === this.state.user._id) {
-
-            // if user made a selection for this game, apply selection
+            // aplly pick data to game 
             game.selected = pick.selected;
             game.localPickId = pick._id;
             game.pickImage = game[pick.selected + 'Team'].name;
 
-            // if game is locked, get lose or win result otherwise leave at pending
+            // if game is NOT open
             if (game.winner) {
-              // change result to either win, lose or tie
+              // change result to either win, lose, tie or pending
               if (game.winner === 'tie') {
                 game.result = 'tie';
               } else if (game.winner === 'pending') {
-                console.log('pending', game.roadTeam.city);
                 game.result = 'pending';
               }
               else if (game.winner === pick.selected) {
@@ -145,15 +85,15 @@ class HomeScreen extends React.Component {
           }
 
         });
-        // console.log('????????????', game.selected);
+        // if user didn't make a selection for the game, automatic lose
         if (!game.selected && game.winner !== null) {
           // console.log('applying lose to result');
           game.result = 'lose';
         }
       });
-
     }
-    // console.log('BEFORE', games);
+    console.log('attache picks at end', Date.now());
+    // this.props.screenProps.resetWeekLoading();
   }
 
   handleCreatePick = async (game, selected, index) => {
@@ -166,12 +106,7 @@ class HomeScreen extends React.Component {
       return;
     }
 
-
-    // get user from storage
-    // const jsonUser = await AsyncStorage.getItem('user');
-    // const user = JSON.parse(jsonUser);
     const { user } = this.state;
-
     // if game has no selection, we want to create a new pick
     if (!game.selected) {
       const pick = {
@@ -200,7 +135,6 @@ class HomeScreen extends React.Component {
         ],
         { cancelable: false },
       );
-
 
     }
     // else we want to edit the selection
@@ -243,41 +177,19 @@ class HomeScreen extends React.Component {
   }
 
   render() {
-    // this.props.league.picks.forEach(pick => {
-    //   console.log('homeScreen', pick.game.roadTeam.city, pick.game.winner);
-    // });
-    // // console.log('GAME SCREEN props', this.props.navigation);
-    // console.log('HOEM SCREEN LEAGUE', this.props.league);
-
-    // console.log('home screen LEAGUE', this.props.league);
-
+    console.log('home screen renders at beginning', Date.now());
     const { league } = this.props;
-    // console.log('sfadsfds', this.props.screenProps.viewWeek);
+    // filter out games for currently viewing week
     const games = league.games.filter(game => {
-      // console.log(game.week.value, this.props.screenProps.viewWeek.value);
       return game.week === this.props.screenProps.viewWeek.value;
     });
-    // console.log('after filter len', games.length);
-
-
-
+    // filter out picks for currently viewing week
     const picks = league.picks.filter(pick => {
       return pick.game.week === this.props.screenProps.viewWeek.value;
     });
-    // console.log('PICKS XXXXXXXXXXXXXXXXXXXXX', picks);
-    // console.log('LEAGUE', league);
-    // console.log('WEEKLY GAMES', games);
-    // console.log('PICK AFTER FILTER', picks);
-
-    // console.log('LEAGUE', this.props.league);
     this.addPickToGame(games, picks);
-
-
-
-    // console.log('AFTER');
+    console.log('home screen renders at end', Date.now());
     return (
-
-
       <ScrollView style={styles.root} stickyHeaderIndices={[0]}
         refreshControl={
           <RefreshControl
@@ -286,34 +198,26 @@ class HomeScreen extends React.Component {
           />
         }
       >
-        {/* <Weeks /> */}
         {/* sticky weeks */}
-
         <View style={{ elevation: 10 }}>
-          <Weeks screenProps={this.props.screenProps} navigation={this.props.navigation} />
+          <Weeks screenProps={this.props.screenProps} />
         </View>
 
-        {/* stickyHeaderIndices={[0]} */}
-
-        {/* <NavigationEvents onWillForcus={payload => { alert() }} /> */}
-        {this.props.loader.loading ?
+        {this.props.loader.fetchingLeague || this.props.screenProps.weekLoading ?
           <View style={styles.loading}><ProgressBarAndroid /></View> :
           <View style={styles.container}>
             {games.map((game, index) => {
-
               return (
-
                 <Card key={game._id} style={styles.card}>
                   <View style={styles.dateBox}>
                     <Text style={styles.dateTime}>Sunday, September 7</Text>
-                    <Text style={styles.dateTime}>10:00 AM</Text>
+                    <Text style={styles.dateTime}>10:00 AMp</Text>
                   </View>
                   <View style={styles.gameBox}>
                     <View style={styles.gameSection}>
 
                       {/* Road team */}
                       <TouchableNativeFeedback onPress={() => { this.handleCreatePick(game, 'road', index) }}>
-                        {/* <CardItem style={game.selected === 'road' ? styles[game.result + 'Team'] : styles.openTeam} > */}
                         <CardItem style={game.selected === 'road' ? styles.teamRoadSelected : styles.teamRoad} >
                           {/* Team */}
                           <View style={styles.teamBox}>
@@ -341,7 +245,6 @@ class HomeScreen extends React.Component {
                       {/* Home team */}
                       <TouchableNativeFeedback onPress={() => { this.handleCreatePick(game, 'home', index) }}>
                         <CardItem style={game.selected === 'home' ? styles.teamHomeSelected : styles.teamHome}>
-                          {/* <CardItem style={game.selected === 'home' ? styles[game.result + 'Team'] : styles.openTeam}> */}
                           {/* Team */}
                           <View style={styles.teamBox}>
                             {/* Name */}
@@ -373,21 +276,14 @@ class HomeScreen extends React.Component {
                         resizeMode="contain"
                         source={images.teams[game.pickImage]}
                       />}
-
                     </View>
                   </View>
-
-
                 </Card>
-
-
               );
             })}
           </View>
         }
-
       </ScrollView>
-
     );
   }
 }
@@ -441,8 +337,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-
-
   gameSection: {
     width: '70%',
     borderRightWidth: 1,
@@ -544,12 +438,9 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
-    // picks: state.picks,
-    // games: state.games,
     league: state.league,
     loader: state.loader,
-    // season: state.season
   }
 }
 
-export default connect(mapStateToProps, { fetchSeason, fetchUsers, fetchLeague, createPick, deletePick, getPicks, updatePick, fetchGames })(HomeScreen);
+export default connect(mapStateToProps, { fetchSeason, fetchUsers, fetchLeague, createPick, deletePick, getPicks, updatePick })(HomeScreen);
